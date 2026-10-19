@@ -1,0 +1,218 @@
+{
+  "importedAt": "2026-10-19T21:35:24.533Z",
+  "source": "https://dcbspares.co.za/",
+  "productCount": 1528,
+  "imageCount": 9247,
+  "imageMapping": "src/data/original-assets.json",
+  "productRecords": "src/data/products.json",
+  "sourceCounts": "src/data/catalogue.json",
+  "usage": "Original DCB product photography, category artwork and vehicle-brand logos. Images are stored locally as optimized WebP without creative alteration.",
+  "categoryAndBrandArtwork": [
+    {
+      "path": "public/images/original/starters.webp",
+      "source": "https://dcbspares.co.za/images/banners/4948058_A_1024x10242xee48.png"
+    },
+    {
+      "path": "public/images/original/alternators.webp",
+      "source": "https://dcbspares.co.za/images/banners/ALT3028_A_05dcd066-084b-43fc-88ac-16ae3a63b4c4_1024x10242x89f8.png"
+    },
+    {
+      "path": "public/images/original/bearings.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/bea3360_a_87753e37-79bb-4c1c-83bb-cd48bf7ef293_1024x10242x7e18.png"
+    },
+    {
+      "path": "public/images/original/led-lights.webp",
+      "source": "https://dcbspares.co.za/images/banners/ColLED1_2048x.webp"
+    },
+    {
+      "path": "public/images/original/regulators.webp",
+      "source": "https://dcbspares.co.za/images/banners/ColRegulators_900x.webp"
+    },
+    {
+      "path": "public/images/original/solenoids.webp",
+      "source": "https://dcbspares.co.za/images/banners/ColSolenoids_1080x.webp"
+    },
+    {
+      "path": "public/images/original/drives.webp",
+      "source": "https://dcbspares.co.za/images/banners/ColDrives_540x.webp"
+    },
+    {
+      "path": "public/images/original/accessories.webp",
+      "source": "https://dcbspares.co.za/images/banners/Access2_2048x.png"
+    },
+    {
+      "path": "public/images/original/tail-lights.webp",
+      "source": "https://dcbspares.co.za/images/banners/ColTail_900x.webp"
+    },
+    {
+      "path": "public/images/original/globes.webp",
+      "source": "https://dcbspares.co.za/images/banners/ColGlobes_1296x.webp"
+    },
+    {
+      "path": "public/images/original/terminals.webp",
+      "source": "https://dcbspares.co.za/images/banners/ColTerminals_2048x.webp"
+    },
+    {
+      "path": "public/images/original/wires.webp",
+      "source": "https://dcbspares.co.za/images/banners/wires1copy.png"
+    },
+    {
+      "path": "public/images/original/fuses.webp",
+      "source": "https://dcbspares.co.za/images/banners/fuses.png"
+    },
+    {
+      "path": "public/images/original/brush-holders.webp",
+      "source": "https://dcbspares.co.za/images/banners/ColBrushHolders_720x.webp"
+    },
+    {
+      "path": "public/images/original/brushes.webp",
+      "source": "https://dcbspares.co.za/images/banners/ColBrushes_1728x.webp"
+    },
+    {
+      "path": "public/images/original/starter-kits.webp",
+      "source": "https://dcbspares.co.za/images/banners/ColStarterKits_360x.webp"
+    },
+    {
+      "path": "public/images/original/mitsubishi.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/mitsubishi_logo.png"
+    },
+    {
+      "path": "public/images/original/ford.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/ford_logo_1_38e4faea1c2d-mobile.jpg"
+    },
+    {
+      "path": "public/images/original/mazda.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/mazda_logo.jpg"
+    },
+    {
+      "path": "public/images/original/volvo.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/volvo_logo.jpg"
+    },
+    {
+      "path": "public/images/original/mercedes-benz.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/mercedes-benz-logo.png"
+    },
+    {
+      "path": "public/images/original/toyota.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/toyota-logo.png"
+    },
+    {
+      "path": "public/images/original/citroen.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/citroen-new-brand-identity-3-1.jpg"
+    },
+    {
+      "path": "public/images/original/peugeot.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/pngimg_com_-_peugeot_png36.png"
+    },
+    {
+      "path": "public/images/original/john-deere.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/jd.jpg"
+    },
+    {
+      "path": "public/images/original/case.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/case.png"
+    },
+    {
+      "path": "public/images/original/cummins.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/cummins-logo.png"
+    },
+    {
+      "path": "public/images/original/volkswagen.webp",
+      "source": "https://dcbspares.co.za/images/com_hikashop/upload/new_20vw_20logo_202.jpg"
+    }
+  ],
+  "logo": {
+    "path": "public/images/original/dcb-logo.webp",
+    "source": "https://dcbspares.co.za/templates/yootheme/cache/dd/Logo%20copy-dd9438b2.webp",
+    "note": "Original logo recovered from the public website template image. Primary /images/Logo%20copy.png returns 404."
+  },
+  "companyProfile": {
+    "path": "public/documents/dcb-company-profile-2026.pdf",
+    "source": "User-supplied DCB Auto Spares - Company Profile.pdf",
+    "pages": 5,
+    "previews": "public/images/original/company-profile-page-{1..5}.webp"
+  },
+  "companyCopy": "Original About us text retained in src/data/company.json; branch details also verified against the supplied 2026 profile.",
+  "unavailableHistoricProducts": [
+    {
+      "url": "https://dcbspares.co.za/product/5323-starter-ade-352-mercedes-benz-if-24v-9t-4-0kw",
+      "id": 5323,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/4737-alternator-a14vi-sg15c-citroen-peugeot-12v-150a",
+      "id": 4737,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/4707-alternator-25si-24v-50a",
+      "id": 4707,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/4804-alternator-fiat-palio-siena-stilo-1-6l-kcb1-12v-80a",
+      "id": 4804,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/4973-alternator-toyota-avensis-corolla-2-0l-diesel-12v-120a",
+      "id": 4973,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/5888-starter-volkswagenn-golf-iv-1-4l-d7e-12v-9t-0-9kw",
+      "id": 5888,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/4924-alternator-nissan-pathfinder-4-0l-12v-130a",
+      "id": 4924,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/4835-alternator-isuzu-4hf1-engine-24v-50a",
+      "id": 4835,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/4917-alternator-nissan-cabstar-41-24v-35a",
+      "id": 4917,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/5215-nissan-primera",
+      "id": 5215,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/4934-alternator-nissan-ud60-fe6-engine-24v-50a",
+      "id": 4934,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/4922-alternator-nissan-navara-2-5l-dci-a2tg-12v-100a",
+      "id": 4922,
+      "status": 404,
+      "name": ""
+    },
+    {
+      "url": "https://dcbspares.co.za/product/5937-toyota-2-4-diesel-pump-d-pulley-internalreg",
+      "id": 5937,
+      "status": 404,
+      "name": ""
+    }
+  ],
+  "inventory": "Snapshot of all current public category and brand listings. No live prices, stock service, checkout or automatic form submission is supplied by this static rebuild.",
+  "verification": "All category counts checked against the original site; every original gallery image downloaded, with any failures recorded in src/data/catalogue.json."
+}

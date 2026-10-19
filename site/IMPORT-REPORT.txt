@@ -1,0 +1,20 @@
+DCB ORIGINAL WEBSITE IMPORT
+
+Imported: 2026-10-19T21:35:24.533Z
+Source: https://dcbspares.co.za/
+
+Current products: 1528
+Product ranges: 16
+Vehicle-brand ranges: 12
+Downloaded original images: 9247
+Product import errors: 0
+Image download errors: 0
+Company profile: all five pages, plus the full original PDF
+
+The original sitemap also contained 13 older product URLs that return
+HTTP 404 on the source website. These records could not be recovered.
+All products currently listed in the sixteen categories and twelve brand
+ranges are included. Six renamed product URLs retain working aliases.
+
+This is a local catalogue snapshot. Prices and current availability are
+confirmed through DCB; enquiries open a visitor-reviewed WhatsApp message.

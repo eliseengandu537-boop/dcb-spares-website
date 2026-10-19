@@ -1,0 +1,8 @@
+import Image from "next/image";
+import type { Metadata } from "next";
+import { Download, ArrowUpRight } from "lucide-react";
+import { PageHeading } from "@/components/ui";
+import { ContactSection } from "@/components/sections";
+export const metadata:Metadata={title:"Company profile",description:"Read and download the complete 2026 DCB Auto Spares company profile."};
+const labels=["Company profile cover","Company overview and service","All sixteen product ranges","Vehicle brands and customers","Branch contact details"];
+export default function CompanyProfile(){return <><PageHeading eyebrow="DCB AUTO SPARES / 2026" title="Our business." accent="Your connection.">Importers and distributors of auto-electrical spares. Explore the complete five-page company profile, from our products to the people and branches behind them.</PageHeading><section className="container profile-section"><div className="profile-actions"><a href="/documents/dcb-company-profile-2026.pdf" download className="button button-primary"><Download size={17} />Download company profile</a><a href="/documents/dcb-company-profile-2026.pdf" target="_blank" rel="noopener noreferrer" className="text-link">Open full PDF<ArrowUpRight size={16} /></a></div><div className="profile-pages">{labels.map((label,i)=><figure key={label}><a href={`/images/original/company-profile-page-${i+1}.webp`} target="_blank" rel="noopener noreferrer" aria-label={`Open ${label.toLowerCase()}`}><Image src={`/images/original/company-profile-page-${i+1}.webp`} alt={label} width={714} height={1010} loading="lazy" /></a><figcaption><span>0{i+1} / 05</span>{label}</figcaption></figure>)}</div></section><ContactSection /></>;}

@@ -1,0 +1,8 @@
+import Link from "next/link";
+import { ArrowUpRight, MessageCircle } from "lucide-react";
+import { Wordmark } from "./ui";
+import { branches, whatsapp } from "@/lib/data";
+
+export function Footer() {
+  return <footer className="footer"><div className="container"><div className="footer-grid"><div className="footer-brand"><Link href="/" aria-label="DCB Spares home"><Wordmark /></Link><p>The right parts.<br />The power to keep moving.</p><a className="footer-email" href="mailto:info@dcbspares.co.za">info@dcbspares.co.za<ArrowUpRight size={15} /></a></div><div><h3>Explore</h3><Link href="/products/">Our products</Link><Link href="/about/">About DCB</Link><Link href="/company-profile/">Company profile</Link><Link href="/brands/">Vehicle brands</Link><Link href="/contact/">Get in touch</Link></div>{branches.map(branch => <div key={branch.name}><h3>{branch.name}</h3><p>{branch.street}<br />{branch.area}</p><a className="footer-phone" href={`tel:${branch.tel}`}>{branch.phone}<ArrowUpRight size={14} /></a><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branch.map)}`} target="_blank" rel="noopener noreferrer">Get directions<ArrowUpRight size={13} /></a></div>)}</div><div className="footer-bottom"><p>© {new Date().getFullYear()} DCB Spares. All rights reserved.</p><span>BUILT TO KEEP YOU MOVING.</span><Link href="/company-profile/">Company profile<ArrowUpRight size={13} /></Link></div></div><a href={whatsapp()} className="floating-whatsapp" target="_blank" rel="noopener noreferrer" aria-label="Chat with DCB Spares on WhatsApp"><MessageCircle size={23} /><span>Let’s talk parts</span></a></footer>;
+}
