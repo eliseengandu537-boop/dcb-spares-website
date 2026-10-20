@@ -1,0 +1,45 @@
+.assistant-quote-choices { display: grid; gap: 8px; margin-top: 17px; }
+.assistant-quote-choices > a, .assistant-quote-choices > button { display: flex; align-items: center; gap: 9px; padding: 12px 10px; border: 1px solid #ffffff26; background: #ffffff05; border-radius: 6px; text-align: left; font-size: 11px; color: #f3e9eb; }
+.assistant-quote-choices > a { color: #a8d6bb; border-color: #a8d6bb30; }
+.assistant-quote-choices > button { border-color: #f76b7955; background: #f32d3712; }
+.assistant-quote-choices > :is(a, button) svg:last-child { margin-left: auto; }
+.assistant-quote { min-width: 0; }
+.assistant-quote h3 { font-size: 24px; line-height: 1.2; letter-spacing: -.045em; margin: 21px 0 10px; }
+.assistant-quote h3:focus { outline: none; }
+.assistant-quote > p { color: #b0b1bd; font-size: 11px; line-height: 1.8; margin-bottom: 21px; }
+.quote-progress { display: flex; justify-content: space-between; gap: 10px; color: #747786; font-size: 9px; border-bottom: 1px solid var(--border); padding-bottom: 16px; }
+.quote-progress > span { display: flex; align-items: center; gap: 7px; }
+.quote-progress b { display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid #ffffff20; border-radius: 50%; font-size: 9px; font-weight: 500; }
+.quote-progress .is-active { color: #f5e8eb; }
+.quote-progress .is-active b { border-color: #ee526477; background: #ec3c5320; }
+.quote-field { display: grid; gap: 8px; margin-bottom: 16px; color: #c8cad4; font-size: 11px; }
+.quote-field input { min-width: 0; width: 100%; background: #08090b; border: 1px solid #ffffff2a; border-radius: 6px; padding: 12px; color: #fff; font-size: 12px; }
+.quote-field input[aria-invalid="true"] { border-color: #ff6477; }
+.quote-field-error { color: #ff9da7; font-size: 10px; }
+.quote-controls { display: flex; justify-content: space-between; gap: 16px; align-items: center; margin-top: 22px; }
+.quote-controls .button { padding: 12px 14px; min-height: 44px; gap: 10px; font-size: 10px; }
+.quote-controls .text-link { display: flex; gap: 7px; font-size: 10px; }
+.quote-controls button:disabled { opacity: .55; }
+.quote-review { margin: 0; border: 1px solid #ffffff17; background: #ffffff02; padding: 5px 14px; border-radius: 8px; }
+.quote-review > div { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.quote-review > div:last-child { border-bottom: 0; }
+.quote-review dt { font-size: 9px; color: #8d91a1; }
+.quote-review dd { font-size: 12px; color: #e5e5ec; margin: 5px 0 0; overflow-wrap: anywhere; }
+.quote-recipients { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 8px; padding-block: 18px 12px; }
+.quote-recipients > span { grid-column: 1/-1; font-size: 8px; letter-spacing: .12em; color: #9295a3; margin-bottom: 5px; }
+.quote-recipients a { font-size: 10px; color: #d3a6af; overflow-wrap: anywhere; }
+.quote-privacy { font-size: 9px; line-height: 1.8; color: #a0a3b1; }
+.quote-honeypot { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); pointer-events: none; }
+.quote-error { padding: 14px; border: 1px solid #f8758555; border-radius: 8px; margin-top: 18px; background: #ec2f4210; display: grid; gap: 13px; }
+.quote-error p { color: #ffb9c2; font-size: 11px; line-height: 1.8; }
+.quote-error a { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+.quote-error small { color: #b4a7b0; font-size: 9px; line-height: 1.7; }
+.quote-confirmation { padding-top: 20px; }
+.quote-success-icon { width: 52px; height: 52px; border: 1px solid #8ac2a34d; background: #29664338; color: #a3d4b8; border-radius: 50%; display: grid; place-items: center; }
+.quote-reference { display: block; border-block: 1px solid var(--border); padding-block: 14px; margin-bottom: 24px; font-size: 10px; color: #c1a6b0; letter-spacing: .1em; }
+.quote-confirmation > .button { font-size: 11px; gap: 10px; }
+.quote-confirmation > .text-link { display: flex; align-items: center; gap: 10px; margin-top: 22px; font-size: 11px; }
+@media(max-width:640px) {
+  .quote-field input { font-size: 16px; }
+  .quote-field input::placeholder { font-size: 11px; }
+}

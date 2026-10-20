@@ -25,6 +25,88 @@ export function HeroMotion({ children }: { children: ReactNode }) {
   return <motion.div ref={ref} className="hero-art" style={{ y: reduced ? 0 : y }}>{children}</motion.div>;
 }
 
+export function HeroVideo() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const textFreeStart = 4.2;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let isVisible = true;
+    let disposed = false;
+
+    const playWhenReady = () => {
+      if (disposed || reduced || !isVisible || document.hidden || video.readyState < 2) return;
+      void video.play().catch((error: unknown) => {
+        if (error instanceof Error && error.name !== "AbortError") {
+          console.error("The hero background video could not start playing.", error);
+        }
+      });
+    };
+
+    const onSeeked = () => {
+      if (video.currentTime < textFreeStart) return;
+      video.classList.add("is-ready");
+      playWhenReady();
+    };
+
+    const startTextFreeSegment = () => {
+      if (video.currentTime < textFreeStart || video.currentTime >= video.duration - 0.25) {
+        video.currentTime = textFreeStart;
+      }
+    };
+
+    const onTimeUpdate = () => {
+      if (video.duration && video.currentTime >= video.duration - 0.25) {
+        video.currentTime = textFreeStart;
+      }
+    };
+
+    const observer = new IntersectionObserver(([entry]) => {
+      isVisible = entry.isIntersecting;
+      if (isVisible) playWhenReady();
+      else video.pause();
+    });
+    const onVisibilityChange = () => {
+      if (document.hidden) video.pause();
+      else playWhenReady();
+    };
+
+    observer.observe(video);
+    video.addEventListener("loadedmetadata", startTextFreeSegment);
+    video.addEventListener("seeked", onSeeked);
+    video.addEventListener("timeupdate", onTimeUpdate);
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    if (video.readyState >= 1) startTextFreeSegment();
+
+    return () => {
+      disposed = true;
+      observer.disconnect();
+      video.removeEventListener("loadedmetadata", startTextFreeSegment);
+      video.removeEventListener("seeked", onSeeked);
+      video.removeEventListener("timeupdate", onTimeUpdate);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+      video.pause();
+    };
+  }, []);
+
+  return (
+    <video
+      ref={videoRef}
+      className="hero-background-video"
+      src="/videos/hero-background.mp4"
+      poster="/images/original/hero-alternator.webp"
+      muted
+      playsInline
+      preload="metadata"
+      aria-hidden="true"
+      tabIndex={-1}
+    />
+  );
+}
+
 export function Atmosphere() {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {

@@ -88,9 +88,11 @@ h2 > span { color: #8c8d95; }
 
 /* Editorial hero. Product remains the primary visual; light stays behind it. */
 .hero { position: relative; min-height: 660px; height: min(760px, calc(100svh - 122px)); overflow: hidden; isolation: isolate; background: #08090b; }
-.hero-art { position: absolute; width: min(1170px, 85%); right: -2%; top: -50px; bottom: 0; z-index: -3; }
+.hero-art { position: absolute; width: min(1170px, 85%); right: -2%; top: -50px; bottom: 0; z-index: -3; background: url("/images/original/hero-alternator.webp") center 48% / cover no-repeat; }
 .hero-art picture { display: block; height: 100%; }
 .hero-art img { height: 100%; width: 100%; object-fit: cover; object-position: center 48%; }
+.hero-art .hero-background-video { width: 100%; height: 100%; object-fit: cover; object-position: center 48%; opacity: 0; transition: opacity 1.2s var(--ease); }
+.hero-art .hero-background-video.is-ready { opacity: 1; }
 .hero-shade { position: absolute; inset: 0; z-index: -2; background: linear-gradient(90deg, #08090b 0%, #08090bf5 18%, #08090bad 37%, transparent 61%), linear-gradient(0deg, #08090b 0%, transparent 20%, transparent 85%, #08090b80 100%); }
 .atmosphere { position: absolute; inset: -20%; z-index: -4; background: radial-gradient(ellipse at 78% 40%, #8e172238 0%, transparent 46%), radial-gradient(ellipse at 46% 95%, #39122230 0%, transparent 50%); animation: atmosphere-drift 18s ease-in-out infinite alternate; pointer-events: none; }
 @keyframes atmosphere-drift { from { transform: translate3d(-1%, 0, 0) scale(1); } to { transform: translate3d(3%, -2%, 0) scale(1.05); } }
@@ -125,6 +127,38 @@ h2 > span { color: #8c8d95; }
 .finder-help { display: flex; flex-direction: column; gap: 3px; font-size: 10px; color: #8c8d95; }
 .finder-help .text-link { font-size: 11px; color: #e8e8eb; }
 
+/* Scroll-pinned exploded alternator showcase. */
+.alternator-story { position: relative; height: 240svh; background: radial-gradient(ellipse at 77% 49%, #4c101a58, transparent 47%), linear-gradient(115deg, #0b0c0f, #111014 55%, #0b0c0f); }
+.alternator-story-stage { position: sticky; top: 122px; height: calc(100svh - 122px); min-height: 560px; overflow: hidden; border-block: 1px solid #ffffff13; }
+.alternator-story-inner { position: relative; width: min(1264px, calc(100% - 112px)); height: 100%; margin-inline: auto; display: grid; grid-template-columns: minmax(270px, .78fr) minmax(0, 1.22fr); grid-template-rows: minmax(0, 1fr) auto auto; column-gap: 34px; align-items: center; }
+.alternator-story-copy { position: relative; z-index: 2; max-width: 390px; }
+.alternator-story-copy .micro-label { display: inline-flex; align-items: center; gap: 10px; color: #d1c4c6; font-size: 9px; letter-spacing: .16em; }
+.alternator-story-copy .micro-label i { width: 18px; height: 2px; background: var(--red); }
+.alternator-story-copy h2 { margin-top: 22px; font-size: clamp(40px, 5vw, 68px); line-height: 1.02; }
+.alternator-story-copy h2 span { color: #9d9ba2; }
+.alternator-story-copy > p { max-width: 370px; margin-top: 20px; color: #a3a1aa; font-size: 13px; line-height: 1.9; }
+.alternator-scroll-cue { display: flex; align-items: center; gap: 10px; margin-top: 38px; color: #e2dfe2; font-size: 8px; letter-spacing: .16em; }
+.alternator-scroll-cue svg { color: var(--red); }
+.alternator-story-visual { position: relative; width: 100%; height: min(56vh, 490px); min-height: 310px; isolation: isolate; }
+.alternator-visual-glow { position: absolute; z-index: -1; inset: 15%; border-radius: 50%; background: #ef293320; filter: blur(58px); }
+.alternator-photo, .alternator-exploded-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.alternator-photo img { object-fit: contain; filter: drop-shadow(0 25px 46px #0009); }
+.alternator-exploded-svg { overflow: visible; filter: drop-shadow(0 18px 25px #0008); }
+.alternator-visual-label { position: absolute; right: 5%; bottom: 2%; display: flex; align-items: center; gap: 9px; color: #a3a0a8; font-size: 7px; letter-spacing: .16em; }
+.alternator-visual-label span { color: #f4f2f3; font-family: var(--heading); font-size: 13px; font-style: italic; font-weight: 700; letter-spacing: -.08em; }
+.alternator-visual-label i { width: 20px; height: 1px; background: var(--red); }
+.alternator-component-list { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #ffffff22; }
+.alternator-component { min-height: 90px; display: flex; align-items: flex-start; gap: 13px; padding: 17px 16px 13px 0; border-right: 1px solid #ffffff16; }
+.alternator-component + .alternator-component { padding-left: 17px; }
+.alternator-component:last-child { border-right: 0; }
+.alternator-component > span { color: #f32d37; font-size: 8px; font-weight: 600; letter-spacing: .12em; }
+.alternator-component > div { min-width: 0; }
+.alternator-component h3 { font-size: 12px; font-weight: 550; letter-spacing: -.02em; }
+.alternator-component p { margin-top: 5px; color: #898890; font-size: 9px; line-height: 1.6; }
+.alternator-component > svg { margin: 2px 8px 0 auto; color: #68666d; }
+.alternator-progress { grid-column: 1 / -1; height: 2px; margin-top: 11px; overflow: hidden; background: #ffffff18; }
+.alternator-progress span { display: block; width: 100%; height: 100%; transform-origin: left center; background: linear-gradient(90deg, #9c1825, #f32d37 72%, #ff777c); }
+
 /* Product discovery uses product photography, spacious type and fine rules. */
 .section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 30px; margin-bottom: 42px; }
 .section-heading .button { margin-bottom: 3px; }
@@ -156,6 +190,10 @@ h2 > span { color: #8c8d95; }
 .brand-strip-intro { min-width: 180px; padding-right: 38px; border-right: 1px solid var(--border); }
 .brand-strip-intro > span { font-size: 8px; letter-spacing: .1em; color: #92939c; line-height: 1.7; display: block; }
 .brand-strip-intro a { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 9px; color: #c7c8ce; }
+.brand-strip .brand-compatibility-note { display: block; color: #a7a8b1; font-size: 11px; line-height: 1.8; margin-top: 24px; padding-top: 18px; border-top: 1px solid var(--border); }
+.compatibility-note { color: #aaacb6; font-size: 12px; line-height: 1.8; margin-top: 18px; }
+.catalogue-fitment-note { margin-bottom: 20px; color: #a7a9b3; font-size: 12px; line-height: 1.8; }
+.brand-detail-heading p.compatibility-note { font-size: 12px; }
 .brand-names { display: flex; align-items: center; justify-content: space-between; gap: 35px; flex: 1; color: #a1a2a9; }
 .brand-names > span { display: block; white-space: nowrap; }
 .brand-toyota { font-size: 20px; font-weight: 750; letter-spacing: -.06em; }
@@ -392,6 +430,14 @@ h2 > span { color: #8c8d95; }
   .trust-line { gap: 13px; font-size: 8px; }
   .finder-content { gap: 25px; }
   .finder-help { display: none; }
+  .alternator-story-inner { width: calc(100% - 52px); column-gap: 12px; }
+  .alternator-story-copy { max-width: 310px; }
+  .alternator-story-copy h2 { font-size: clamp(39px, 5.3vw, 52px); }
+  .alternator-story-copy > p { font-size: 11px; }
+  .alternator-story-visual { height: min(48vh, 430px); }
+  .alternator-component { gap: 9px; padding-right: 9px; }
+  .alternator-component + .alternator-component { padding-left: 10px; }
+  .alternator-component p { font-size: 8px; }
   .featured-grid { gap: 14px; }
   .product-card-art { height: 170px; }
   .product-card-top { padding: 18px 18px 0; }
@@ -488,6 +534,25 @@ h2 > span { color: #8c8d95; }
   .finder-content p strong { font-size: 11px; }
   .finder-content form { flex: 1 0 100%; }
   .finder-content input { padding: 15px; }
+  .alternator-story { height: 210svh; }
+  .alternator-story-stage { top: 107px; height: calc(100svh - 107px); min-height: 520px; }
+  .alternator-story-inner { width: calc(100% - 40px); grid-template-columns: 1fr; grid-template-rows: auto minmax(190px, 1fr) auto auto; gap: 8px; }
+  .alternator-story-copy { max-width: 100%; padding-top: 15px; }
+  .alternator-story-copy .micro-label { font-size: 7px; }
+  .alternator-story-copy h2 { margin-top: 10px; font-size: clamp(34px, 10vw, 47px); }
+  .alternator-story-copy > p { max-width: 500px; margin-top: 8px; font-size: 10px; line-height: 1.6; }
+  .alternator-scroll-cue { margin-top: 12px; font-size: 7px; }
+  .alternator-story-visual { width: 100%; height: 100%; min-height: 190px; max-height: 320px; }
+  .alternator-visual-label { right: 1%; bottom: 0; font-size: 6px; }
+  .alternator-component-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .alternator-component { min-height: 62px; gap: 8px; padding: 10px 8px 9px 0; }
+  .alternator-component + .alternator-component { padding-left: 9px; }
+  .alternator-component:nth-child(2) { border-right: 0; }
+  .alternator-component:nth-child(n+3) { border-top: 1px solid #ffffff16; }
+  .alternator-component h3 { font-size: 10px; }
+  .alternator-component p { margin-top: 3px; font-size: 7px; }
+  .alternator-component > svg { display: none; }
+  .alternator-progress { margin-top: 2px; }
   .section-heading { flex-direction: column; align-items: flex-start; gap: 25px; margin-bottom: 30px; }
   .section-heading .button { min-height: 42px; padding: 11px 17px; font-size: 10px; }
   .featured-grid { grid-template-columns: 1fr; gap: 18px; }
@@ -630,6 +695,10 @@ h2 > span { color: #8c8d95; }
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
   .hero-art { transform: none !important; }
+  .alternator-story { height: auto; }
+  .alternator-story-stage { position: relative; top: auto; height: auto; min-height: 0; }
+  .alternator-story-inner { min-height: 580px; padding-block: 42px 22px; }
+  .alternator-story-visual { height: 390px; }
   .product-card:hover, .button:hover, .floating-whatsapp:hover, .product-card:hover img { transform: none; }
 }
 
@@ -865,3 +934,18 @@ h2 > span { color: #8c8d95; }
   .assistant-compose > div > span { font-size: 7px; }
 }
 @media(prefers-reduced-motion:reduce) { .assistant-launcher:hover { transform: none; } }
+
+@media(max-height:700px) and (max-width:760px) {
+  .alternator-story { height: auto; padding-block: 82px 22px; }
+  .alternator-story-stage { position: relative; top: auto; height: auto; min-height: 0; overflow: visible; }
+  .alternator-story-inner { height: auto; min-height: 0; padding-block: 18px; grid-template-rows: auto 170px auto auto; }
+  .alternator-story-copy { padding-top: 0; }
+  .alternator-story-copy h2 { margin-top: 8px; font-size: 35px; }
+  .alternator-story-copy > p { margin-top: 7px; font-size: 9px; }
+  .alternator-scroll-cue { display: none; }
+  .alternator-story-visual { min-height: 0; max-height: none; }
+  .alternator-component { min-height: 56px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-art .hero-background-video { transition: none; }
+}

@@ -12,8 +12,12 @@ Production
   npm run build
   npm run preview
 
-The build exports the website to out/. Preview serves that export on
-http://127.0.0.1:3001. It can be hosted by any static web host.
+Run these commands from the site/ directory.
+The production build is written to .next/. Preview runs the Next.js Node
+server at http://127.0.0.1:3001, including the quote submission endpoint.
+Automatic email requires this server runtime; static-only hosting cannot
+run it. Any existing out/ directory is an older static export and does not
+contain the current quote service.
 
 Browser checks
   Start npm run preview, then npm test in another terminal.
@@ -21,13 +25,72 @@ Browser checks
   npm run dev may use a different port if 3000 is occupied; the test
   configuration and screenshot script expect 3001.
 
-Demo assistant
-  The floating Ask DCB widget is a browser-only demo with catalogue search,
-  branch information, quote guidance and a visitor-initiated WhatsApp link.
+DCB Assist
+  The floating widget provides catalogue search, branch information,
+  quote guidance and a visitor-initiated WhatsApp link.
   It uses predefined replies and local catalogue matching, not an AI model.
-  No API key, model installation or backend service is required.
+  These guided replies need no AI API key or model installation.
   Chat history stays in page memory and can be cleared with the reset button.
   npm run dev/build refreshes public/assistant-catalogue.json automatically.
+  The quote form asks for the required part, vehicle make/model, customer
+  name, email, phone and company or location, then shows a review step.
+  Submitting sends these details through the server to all four recipients:
+    Hans@dcbspares.co.za
+    Shane@dcbspares.co.za
+    Gary@dcbspares.co.za
+    Sean@dcbspares.co.za
+  The customer's email is the Reply-To address. Recipient addresses are
+  fixed on the server and cannot be chosen by a website visitor.
+
+Google Workspace email setup
+  site/.env.local is ready for your local settings and is ignored by Git.
+  If starting a fresh checkout, copy .env.example to .env.local first.
+  Keep credentials out of chat and source control.
+
+  Configure an authorised Google Workspace sending mailbox:
+    GMAIL_USER=your-sending-mailbox@dcbspares.co.za
+    GMAIL_APP_PASSWORD=your-Google-app-password
+
+  Use an app password, not the mailbox's normal password. App passwords
+  require 2-Step Verification and must be allowed by your Workspace admin.
+  Alternatively, leave GMAIL_APP_PASSWORD blank and set all three:
+    GMAIL_CLIENT_ID
+    GMAIL_CLIENT_SECRET
+    GMAIL_REFRESH_TOKEN
+  OAuth credentials must authorise GMAIL_USER for the Gmail SMTP scope
+  https://mail.google.com/. The refresh token needs offline access.
+  SMTP uses smtp.gmail.com on port 465 with TLS.
+  Reference: https://nodemailer.com/smtp/oauth2
+
+  After saving .env.local, restart npm run preview (or the dev server).
+  These are server-only settings; never add a NEXT_PUBLIC_ prefix.
+  No live email was sent during development verification. Once configured,
+  submit an intentional test quote and confirm receipt in all four inboxes.
+  The website confirms submission only after SMTP accepts all recipients;
+  mailbox delivery or spam filtering still needs that inbox check.
+
+  If email is unconfigured or fails, the form retains entered details and
+  offers WhatsApp and a prefilled email for the visitor to send manually.
+  It does not claim successful submission when sending is unconfirmed.
+  The server validates and limits requests, rejects cross-origin browser
+  submissions and deduplicates retries for ten minutes. Limits and retry
+  records are in memory for one Node process and reset on restart. A future
+  deployment with multiple instances needs shared rate-limit/retry storage.
+  There is no customer database or application logging of quote contents.
+  Submitted messages are retained in the relevant email mailboxes.
+
+Scroll-controlled alternator
+  The homepage uses a locally generated Three.js assembly. Scroll down to
+  separate six components; scroll up to reassemble them. Component buttons
+  explain each part. The model is illustrative, not a service drawing.
+  Reduced motion and unavailable WebGL use the original photograph.
+  The renderer only draws while scroll progress or viewport size changes.
+  src/components/exploded-alternator.tsx controls the interaction.
+  src/lib/alternator-scene.ts builds and renders the model.
+  artifacts/alternator-open-close.webm is the rendered video preview.
+  With the local preview running, regenerate it using:
+    node scripts/render-alternator-video.mjs
+  Set PLAYWRIGHT_BASE_URL to preview a different local port.
 
 Content and contacts
   src/lib/data.ts holds all sixteen product ranges and branch contacts.
@@ -38,10 +101,16 @@ Content and contacts
   src/data/original-assets.json maps source photographs to local files.
 
 Enquiries
-  The form prepares a WhatsApp message for the visitor to review.
-  It never sends automatically and does not save personal information.
-  Email links open the visitor's email application.
-  A server-side enquiry inbox is not connected.
+  The contact-page and product WhatsApp enquiries prepare messages for
+  visitors to review and send themselves. They use +27 64 680 5363.
+  Email links open the visitor's email application. DCB Assist additionally
+  offers automatic email submission once Workspace is configured above.
+
+Brand wording
+  DCB is described as the primary distributor of GB products.
+  Vehicle makes and OE references describe aftermarket compatibility.
+  They do not identify vehicle makers' branded parts supplied by DCB.
+  Shared business statements and sales contacts are in src/lib/business.ts.
 
 Catalogue
   The complete current public catalogue is imported from dcbspares.co.za.
@@ -49,8 +118,8 @@ Catalogue
   and WhatsApp enquiries. Search matches names, SKUs and OE references.
   Browse by category or vehicle brand, sort results and paginate locally.
   Run node scripts/verify-catalogue.mjs to check source counts and images.
-  Run node scripts/verify-catalogue.mjs --export after building to verify
-  every product's exported HTML page as well.
+  The verifier's --export mode applies only to historical static exports;
+  use the production build and browser tests for the current Node version.
   The source does not publish current prices, stock or online checkout.
   Customers confirm those with DCB. This is a catalogue snapshot, not a
   live inventory connection. Source import tooling and cached responses
@@ -68,6 +137,8 @@ Assets
 
 Publication
   .openai/hosting.json records the existing private Sites project identity.
+  Its static out/ setting describes the earlier version, not this Node app.
+  Do not publish the older out/ directory as the updated website.
   The catalogue rebuild runs locally on port 3001 as requested.
   Search indexing is disabled for this private rebuild preview.
   Original dcbspares.co.za hosting and DNS have not been changed.

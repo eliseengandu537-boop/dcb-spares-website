@@ -5,7 +5,7 @@
   "scripts": {
     "predev": "node scripts/prepare-assistant.mjs",
     "dev": "next dev --hostname 127.0.0.1",
-    "preview": "node scripts/serve-preview.mjs",
+    "preview": "next start --hostname 127.0.0.1 --port 3001",
     "prebuild": "node scripts/prepare-assistant.mjs",
     "build": "next build",
     "lint": "eslint .",
@@ -13,24 +13,27 @@
     "test": "playwright test"
   },
   "dependencies": {
-    "next": "^16.0.0",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "@fontsource-variable/inter": "^5.2.0",
+    "@fontsource-variable/space-grotesk": "^5.2.0",
     "framer-motion": "^12.23.0",
     "lucide-react": "^0.468.0",
-    "@fontsource-variable/inter": "^5.2.0",
-    "@fontsource-variable/space-grotesk": "^5.2.0"
+    "next": "^16.0.0",
+    "nodemailer": "^10.0.12",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "three": "^0.186.1"
   },
   "devDependencies": {
-    "typescript": "^5.9.0",
+    "@playwright/test": "^1.56.0",
+    "@tailwindcss/postcss": "^4.1.0",
     "@types/node": "^24.0.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "tailwindcss": "^4.1.0",
-    "@tailwindcss/postcss": "^4.1.0",
+    "@types/three": "^0.186.0",
     "eslint": "^9.39.0",
     "eslint-config-next": "^16.0.0",
-    "@playwright/test": "^1.56.0",
-    "sharp": "^0.34.0"
+    "sharp": "^0.34.0",
+    "tailwindcss": "^4.1.0",
+    "typescript": "^5.9.0"
   }
 }

@@ -10,8 +10,8 @@ import { DemoAssistant } from "@/components/demo-assistant";
 export const metadata: Metadata = {
   metadataBase: new URL("https://dcb-spares-reimagined.concrete-age-7451.chatgpt.site"),
   title: { default: "DCB Spares — Power every journey", template: "%s | DCB Spares" },
-  description: "Auto-electrical spares for the road ahead. Explore alternators, starter motors, LED lighting and more. Visit DCB Spares in Alrode and Cape Town.",
-  openGraph: { title: "DCB Spares — Power every journey", description: "Your auto-electrical connection. Find the right part with DCB Spares.", type: "website", locale: "en_ZA", images: [{ url: "/images/original/hero-alternator.webp", width: 1000, height: 1000, alt: "DCB GB automotive alternator" }] },
+  description: "DCB Spares is the primary distributor of GB products. Explore aftermarket auto-electrical spares compatible with your vehicle.",
+  openGraph: { title: "DCB Spares — Power every journey", description: "Your primary GB distributor. Find aftermarket auto-electrical parts compatible with your vehicle.", type: "website", locale: "en_ZA", images: [{ url: "/images/original/hero-alternator.webp", width: 1000, height: 1000, alt: "DCB GB automotive alternator" }] },
   robots: { index: false, follow: false },
 };
 
