@@ -18,7 +18,7 @@ test("demo assistant finds real products and opens their details",async({page})=
 async function completeQuote(assistant: Locator) {
   await assistant.getByRole("button", { name: "How do I get a quote?" }).click();
   await expect(assistant.getByRole("log")).toContainText("Send DCB your vehicle make and model. You can also chat with our team below on WhatsApp.");
-  await expect(assistant.getByRole("link", { name: "Chat on WhatsApp", exact: true })).toHaveAttribute("href", /wa\.me\/27646805363/);
+  await expect(assistant.getByRole("link", { name: "Chat on WhatsApp", exact: true })).toHaveAttribute("href", /wa\.me\/27836303818/);
   await assistant.getByRole("button", { name: "Request with DCB Assist" }).click();
   await assistant.getByRole("button", { name: "Continue", exact: true }).click();
   expect(await assistant.getByLabel("What do you need a quote for?").evaluate((element: HTMLInputElement) => element.validity.valueMissing)).toBeTruthy();
@@ -85,7 +85,7 @@ test("homepage and brand pages identify GB distribution and aftermarket compatib
   await expect(page.locator(".alternator-intro")).toContainText("DCB Spares is the primary distributor of GB products.");
   await expect(page.locator(".brand-strip")).toContainText("We supply aftermarket equivalents compatible with these vehicles.");
   await expect(page.locator(".brand-strip")).toContainText("DCB does not manufacture or distribute these vehicle makers’ branded parts.");
-  await expect(page.locator(".floating-whatsapp")).toHaveAttribute("href", /wa\.me\/27646805363/);
+  await expect(page.locator(".floating-whatsapp")).toHaveAttribute("href", /wa\.me\/27836303818/);
   await page.getByRole("button", { name: "Get a quote with DCB Assist" }).click();
   await expect(page.getByRole("dialog", { name: "DCB Assist" }).getByRole("heading", { name: "What do you need a quote for?" })).toBeVisible();
   await page.keyboard.press("Escape");
@@ -106,7 +106,7 @@ test("demo quick replies, quote handoff, reset and keyboard close work",async({p
   await assistant.getByRole("button",{name:"Send message"}).click();
   await expect(assistant.getByRole("log")).toContainText("confirm the price, stock and correct fit");
   const handoff=assistant.getByRole("link",{name:"Chat with our team"});
-  await expect(handoff).toHaveAttribute("href",/wa\.me\/27646805363/);
+  await expect(handoff).toHaveAttribute("href",/wa\.me\/27836303818/);
   expect(new URL((await handoff.getAttribute("href"))!).searchParams.get("text")).toContain("How much is a starter?");
   await assistant.getByRole("button",{name:"Start a new conversation"}).click();
   await expect(assistant.getByRole("button",{name:"Toyota Hilux starter"})).toBeVisible();

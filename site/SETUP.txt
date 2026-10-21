@@ -104,7 +104,7 @@ Content and contacts
 
 Enquiries
   The contact-page and product WhatsApp enquiries prepare messages for
-  visitors to review and send themselves. They use +27 64 680 5363.
+  visitors to review and send themselves. They use +27 83 630 3818.
   Email links open the visitor's email application. DCB Assist additionally
   offers automatic email submission once Workspace is configured above.
 

@@ -127,7 +127,7 @@ test("enquiry validates, previews safely encoded details, and closes with Escape
   const href = await dialog.getByRole("link", { name: "Continue to WhatsApp" }).getAttribute("href");
   const url = new URL(href!);
   expect(url.hostname).toBe("wa.me");
-  expect(url.pathname).toBe("/27646805363");
+  expect(url.pathname).toBe("/27836303818");
   expect(url.searchParams.get("text")).toContain("Alex & Co");
   expect(url.searchParams.get("text")).toContain("OE+123/45");
   await dialog.getByRole("button", { name: "Edit enquiry" }).click();

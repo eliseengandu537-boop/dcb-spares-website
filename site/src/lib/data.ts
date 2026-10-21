@@ -36,5 +36,6 @@ export const branches = [
   { name: "DCB Auto Cape", region: "Western Cape", city: "Cape Town", street: "25 Palmiet Road", area: "Stikland Industrial, Cape Town, 7530", phone: "021 286 2737", tel: "+27212862737", map: "25 Palmiet Road, Stikland Industrial, Cape Town, South Africa" },
 ];
 
-export const whatsapp = (message = "Hi DCB Spares, I would like help finding an auto-electrical part.") => `https://wa.me/27646805363?text=${encodeURIComponent(message)}`;
+export const whatsappNumber = "+27 83 630 3818";
+export const whatsapp = (message = "Hi DCB Spares, I would like help finding an auto-electrical part.") => `https://wa.me/${whatsappNumber.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
 export const catalogueUrl = (category: Category) => `https://dcbspares.co.za/category/${category.original}`;
