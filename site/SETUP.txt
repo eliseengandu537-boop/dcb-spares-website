@@ -83,6 +83,8 @@ Scroll-controlled alternator
   The homepage uses a locally generated Three.js assembly. Scroll down to
   separate six components; scroll up to reassemble them. Component buttons
   explain each part. The model is illustrative, not a service drawing.
+  On phones and tablets, the hero scrolls with the page while the model
+  opens. No pinned animation needs to finish before browsing further.
   Reduced motion and unavailable WebGL use the original photograph.
   The renderer only draws while scroll progress or viewport size changes.
   src/components/exploded-alternator.tsx controls the interaction.

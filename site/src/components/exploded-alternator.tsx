@@ -43,20 +43,24 @@ export function ExplodedAlternator() {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     let scene: AlternatorScene | undefined;
     let disposed = false, frame = 0, target = 0, current = 0, start = 0, range = 1;
-    let visible = true, loading = false;
+    let visible = true, loading = false, freeScroll = false;
     const measurements = () => {
-      const top = Number.parseFloat(getComputedStyle(viewport).top) || 0;
+      const layout = getComputedStyle(viewport);
+      const top = Number.parseFloat(layout.top) || 0;
+      freeScroll = layout.position !== "sticky";
       start = window.scrollY + section.getBoundingClientRect().top - top;
-      range = Math.max(1, section.offsetHeight - viewport.offsetHeight);
+      range = Math.max(1, freeScroll
+        ? (intro.current?.offsetHeight ?? viewport.offsetHeight) * 0.6
+        : section.offsetHeight - viewport.offsetHeight);
     };
     const paint = () => {
       const opening = ease(current, 0.1, 0.9);
-      const introOpacity = 1 - ease(current, 0.025, 0.22);
-      const detailOpacity = ease(current, 0.19, 0.36);
+      const introOpacity = freeScroll ? 1 : 1 - ease(current, 0.025, 0.22);
+      const detailOpacity = freeScroll ? 1 : ease(current, 0.19, 0.36);
       section.dataset.phase = current < 0.08 ? "assembled" : current > 0.9 ? "exploded" : "opening";
       if (intro.current) {
         intro.current.style.opacity = String(introOpacity);
-        intro.current.style.transform = `translateY(${-current * 70}px)`;
+        intro.current.style.transform = freeScroll ? "none" : `translateY(${-current * 70}px)`;
         intro.current.inert = introOpacity < 0.05;
       }
       if (detailHeading.current) detailHeading.current.style.opacity = String(detailOpacity);

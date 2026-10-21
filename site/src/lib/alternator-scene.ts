@@ -263,12 +263,14 @@ export function createAlternatorScene(
     camera.bottom = -frameHeight / 2;
     camera.updateProjectionMatrix();
     // Desktop travels from the right-hand hero composition into centre stage.
-    // Mobile fits the opened assembly horizontally beneath the heading.
+    // Mobile keeps the assembly below the copy as the entire hero scrolls away.
     const mobileScale = Math.min(1, frameHeight * aspect / 11.1);
     const initialScale = Math.min(1.35, frameHeight * aspect * 0.46 / 3.4);
-    assembly.scale.setScalar(mobile ? THREE.MathUtils.lerp(0.8, mobileScale, open) : THREE.MathUtils.lerp(initialScale, Math.min(1, frameHeight * aspect / 11.6), open));
+    // Interpolate the visible span so partially opened parts also fit a phone.
+    const mobileFit = 1 / THREE.MathUtils.lerp(1 / 0.8, 1 / mobileScale, open);
+    assembly.scale.setScalar(mobile ? mobileFit : THREE.MathUtils.lerp(initialScale, Math.min(1, frameHeight * aspect / 11.6), open));
     assembly.position.copy(cameraRight).multiplyScalar(mobile ? 0 : frameHeight * aspect * 0.23 * (1 - blend(progress, 0.02, 0.4)));
-    assembly.position.addScaledVector(cameraUp, mobile ? THREE.MathUtils.lerp(-1.25, height < 670 ? 1 : 0.72, open) : 0.05);
+    assembly.position.addScaledVector(cameraUp, mobile ? -1.25 : 0.05);
     assembly.rotation.set(0, -0.15 * (1 - open), mobile ? -0.16 * (1 - open) : -0.06 * (1 - open));
     parts.forEach((part, index) => {
       const separation = blend(progress, 0.1 + (5 - index) * 0.02, 0.8 + (5 - index) * 0.015);
