@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/space-grotesk";
 import "./globals.css";
+import "./browsing.css";
 import { Navigation } from "@/components/navigation";
 import { Footer } from "@/components/footer";
 import { EnquiryProvider } from "@/components/enquiry";
 import { DemoAssistant } from "@/components/demo-assistant";
+import { MobileActions } from "@/components/mobile-actions";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://dcb-spares-reimagined.concrete-age-7451.chatgpt.site"),
@@ -16,5 +18,5 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  return <html lang="en-ZA" data-scroll-behavior="smooth"><body><a className="skip-link" href="#main">Skip to content</a><EnquiryProvider><Navigation /><main id="main">{children}</main><Footer /><DemoAssistant /></EnquiryProvider></body></html>;
+  return <html lang="en-ZA" data-scroll-behavior="smooth"><body id="page-top"><a className="skip-link" href="#main">Skip to content</a><EnquiryProvider><Navigation /><main id="main" tabIndex={-1}>{children}</main><Footer /><DemoAssistant /><MobileActions /></EnquiryProvider></body></html>;
 }

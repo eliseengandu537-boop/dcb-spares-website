@@ -83,8 +83,9 @@ Scroll-controlled alternator
   The homepage uses a locally generated Three.js assembly. Scroll down to
   separate six components; scroll up to reassemble them. Component buttons
   explain each part. The model is illustrative, not a service drawing.
-  On phones and tablets, the hero scrolls with the page while the model
+  On every screen size, the hero scrolls with the page while the model
   opens. No pinned animation needs to finish before browsing further.
+  Tap "Inside the alternator" to open the optional component explanations.
   Reduced motion and unavailable WebGL use the original photograph.
   The renderer only draws while scroll progress or viewport size changes.
   src/components/exploded-alternator.tsx controls the interaction.
@@ -93,6 +94,14 @@ Scroll-controlled alternator
   With the local preview running, regenerate it using:
     node scripts/render-alternator-video.mjs
   Set PLAYWRIGHT_BASE_URL to preview a different local port.
+
+Browsing improvements (local review)
+  The phone action bar provides Find parts, WhatsApp, DCB Assist and Top.
+  Space below the footer keeps the last links clear of that action bar.
+  Catalogue search remains below the navigation as customers browse parts.
+  The filter shortcut and Clear filters help customers refine their search.
+  Reduced motion preferences also apply to scrolling and section reveals.
+  Review at http://127.0.0.1:3001 before publishing these changes.
 
 Content and contacts
   src/lib/data.ts holds all sixteen product ranges and branch contacts.

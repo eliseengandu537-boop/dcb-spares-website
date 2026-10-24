@@ -17,19 +17,16 @@ test("home loads its assets without errors and fits the viewport", async ({ page
   expect(errors).toEqual([]);
 });
 
-test("alternator separates on scroll, explains parts, and reassembles in reverse", async ({ page, isMobile }) => {
+test("page scrolls freely while the alternator opens, explains parts, and closes", async ({ page }) => {
   await page.goto("/");
   const story = page.locator(".alternator-experience");
   await expect(story).toHaveAttribute("data-mode", "interactive", { timeout: 30000 });
   await expect(story.locator("canvas")).toBeVisible();
   const metrics = await story.evaluate(element => {
     const stage = element.querySelector(".alternator-stage")!;
-    const layout = getComputedStyle(stage);
     return {
-      start: window.scrollY + element.getBoundingClientRect().top - Number.parseFloat(layout.top),
-      range: layout.position === "sticky"
-        ? element.getBoundingClientRect().height - stage.getBoundingClientRect().height
-        : element.querySelector(".alternator-intro")!.getBoundingClientRect().height * 0.6,
+      start: window.scrollY + stage.getBoundingClientRect().top,
+      range: stage.getBoundingClientRect().height * 0.6,
     };
   });
   const spread = () => story.locator(".alternator-part-tags > span").evaluateAll(labels => {
@@ -40,9 +37,8 @@ test("alternator separates on scroll, explains parts, and reassembles in reverse
     await page.evaluate(top => window.scrollTo({ top, behavior: "instant" }), metrics.start + metrics.range * progress);
   };
   await scrollTo(0);
-  await expect(story.locator(".alternator-percentage")).toHaveText("00%");
+  await expect(story).toHaveAttribute("data-phase", "assembled");
   const closed = await spread();
-  if (isMobile) {
     const before = await page.evaluate(() => ({
       hero: document.querySelector(".alternator-stage")!.getBoundingClientRect().top,
       search: document.querySelector(".finder-bar")!.getBoundingClientRect().top,
@@ -53,23 +49,21 @@ test("alternator separates on scroll, explains parts, and reassembles in reverse
     await expect.poll(() => page.locator(".finder-bar").evaluate(element => element.getBoundingClientRect().top)).toBeLessThanOrEqual(before.search - 195);
     await expect(story).toHaveAttribute("data-phase", "opening");
     await expect(story.locator(".alternator-intro")).not.toHaveAttribute("inert", "");
-  }
   await scrollTo(0.95);
   await expect(story).toHaveAttribute("data-phase", "exploded");
-  await expect(story.locator(".alternator-percentage")).toHaveText("100%");
   await expect.poll(spread).toBeGreaterThan(closed * 1.3);
-  if (isMobile) await expect(story.locator(".alternator-intro")).not.toHaveAttribute("inert", "");
-  else await expect(story.locator(".alternator-intro")).toHaveAttribute("inert", "");
+  await expect(story.locator(".alternator-part-description")).not.toBeVisible();
+  await story.locator("summary").click();
   await story.getByRole("button", { name: "04 Rotor & shaft" }).click();
   await expect(story.locator(".alternator-part-description")).toContainText("changing magnetic field");
   await story.getByRole("button", { name: "06 Drive pulley" }).click();
   await expect(story.locator(".alternator-part-description")).toContainText("engine’s belt");
+  await story.locator("summary").click();
+  await expect(story.locator(".alternator-part-description")).not.toBeVisible();
   await scrollTo(0);
-  await expect(story.locator(".alternator-percentage")).toHaveText("00%");
+  await expect(story).toHaveAttribute("data-phase", "assembled");
   await expect.poll(async () => Math.abs(await spread() - closed)).toBeLessThan(2);
   await expect(story.getByRole("link", { name: "Explore our parts" })).toBeVisible();
-  if (isMobile) await expect(story.locator(".alternator-detail-panel")).not.toHaveAttribute("inert", "");
-  else await expect(story.locator(".alternator-detail-panel")).toHaveAttribute("inert", "");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
 });
 
@@ -84,6 +78,7 @@ test("alternator keeps its photo and readable details when WebGL is unavailable"
   await page.goto("/");
   await expect(page.locator(".alternator-experience")).toHaveAttribute("data-mode", "static");
   await expect(page.getByRole("img", { name: "DCB GB alternator", exact: true })).toBeVisible();
+  await page.locator(".alternator-explainer summary").click();
   await page.getByRole("button", { name: "06 Drive pulley" }).click();
   await expect(page.locator(".alternator-part-description")).toContainText("engine’s belt");
   expect(await page.locator(".alternator-stage").evaluate(element => getComputedStyle(element).position)).toBe("relative");

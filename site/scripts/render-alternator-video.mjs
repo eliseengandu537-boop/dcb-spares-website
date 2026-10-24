@@ -8,10 +8,9 @@ try {
   await page.waitForFunction(() => document.querySelector(".alternator-experience")?.dataset.mode === "interactive");
   const result = await page.evaluate(async () => {
     const canvas = document.querySelector(".alternator-canvas canvas");
-    const section = document.querySelector(".alternator-experience");
     const stage = document.querySelector(".alternator-stage");
-    const start = scrollY + section.getBoundingClientRect().top - Number.parseFloat(getComputedStyle(stage).top);
-    const range = section.offsetHeight - stage.offsetHeight;
+    const start = scrollY + stage.getBoundingClientRect().top;
+    const range = stage.offsetHeight * 0.6;
     const mimeType = ["video/webm;codecs=vp9", "video/webm;codecs=vp8"].find(type => MediaRecorder.isTypeSupported(type));
     if (!mimeType) throw new Error("The browser cannot encode WebM.");
     const stream = canvas.captureStream(30);

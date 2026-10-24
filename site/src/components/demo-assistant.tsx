@@ -25,9 +25,11 @@ export function DemoAssistant(){
   const [quoteOpen,setQuoteOpen]=useState(false);
   const [quoteBusy,setQuoteBusy]=useState(false);
   useEffect(()=>{
+    const startAssist=()=>{dialog.current?.showModal();setOpen(true);};
     const startQuote=()=>{dialog.current?.showModal();setOpen(true);setQuoteOpen(true);};
+    window.addEventListener("dcb:assist",startAssist);
     window.addEventListener("dcb:quote",startQuote);
-    return()=>window.removeEventListener("dcb:quote",startQuote);
+    return()=>{window.removeEventListener("dcb:assist",startAssist);window.removeEventListener("dcb:quote",startQuote);};
   },[]);
   useEffect(()=>{if(!open)return;const old=document.body.style.overflow;document.body.style.overflow="hidden";return()=>{document.body.style.overflow=old;};},[open]);
   useEffect(()=>{if(open)conversation.current?.scrollTo({top:conversation.current.scrollHeight,behavior:"instant"});},[messages,pending,open]);

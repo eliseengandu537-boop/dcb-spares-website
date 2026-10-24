@@ -5,13 +5,13 @@ import { motion, useAnimationControls, useInView, useReducedMotion, useScroll, u
 
 export function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "0px 0px -40px 0px" });
+  const inView = useInView(ref, { once: true, margin: "0px 0px 60px 0px" });
   const reduced = useReducedMotion();
   const controls = useAnimationControls();
   useEffect(() => {
     if (reduced) { controls.set({ opacity: 1, y: 0 }); return; }
-    if (inView) void controls.start({ opacity: 1, y: 0, transition: { duration: 0.9, delay, ease: [0.22, 1, 0.36, 1] } });
-    else controls.set({ opacity: 0, y: 24 });
+    if (inView) void controls.start({ opacity: 1, y: 0, transition: { duration: 0.45, delay: Math.min(delay, 0.12), ease: [0.22, 1, 0.36, 1] } });
+    else controls.set({ opacity: 0, y: 12 });
   }, [controls, delay, inView, reduced]);
   // The server-rendered content stays visible when JavaScript is unavailable.
   return <motion.div ref={ref} className={className} initial={false} animate={controls}>{children}</motion.div>;

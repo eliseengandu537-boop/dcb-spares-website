@@ -15,13 +15,9 @@ try {
     const mode = await page.locator(".alternator-experience").getAttribute("data-mode");
     for (const [state, progress] of [["closed", 0], ["opening", 0.5], ["open", 0.95], ["reclosed", 0]]) {
       await page.evaluate(progress => {
-        const section = document.querySelector(".alternator-experience");
         const stage = document.querySelector(".alternator-stage");
-        const layout = getComputedStyle(stage);
-        const start = scrollY + section.getBoundingClientRect().top - Number.parseFloat(layout.top);
-        const range = layout.position === "sticky"
-          ? section.offsetHeight - stage.offsetHeight
-          : document.querySelector(".alternator-intro").offsetHeight * 0.6;
+        const start = scrollY + stage.getBoundingClientRect().top;
+        const range = stage.offsetHeight * 0.6;
         window.scrollTo({ top: Math.max(0, start + range * progress), behavior: "instant" });
       }, progress);
       await page.waitForTimeout(1300);
