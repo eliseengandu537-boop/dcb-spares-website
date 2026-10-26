@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ArrowLeft, ArrowRight, Check, Mail, MessageCircle } from "lucide-react";
 import { emptyQuote, quoteEmailLink, quoteFields, quoteText, validateQuote, type QuoteDetails, type QuoteField } from "@/lib/quote";
@@ -74,6 +75,7 @@ export function AssistantQuote({ onCancel, onBusy }: Props) {
     </div>
     <h3 ref={heading} tabIndex={-1}>{["What do you need a quote for?", "How can our team reach you?", "Ready to send to DCB?"][step]}</h3>
     <p>{["Tell us the part you need and your vehicle’s make and model.", "Add your contact details and company or location.", "Check your details. Your request will go to all four sales contacts below."][step]}</p>
+    <p className="privacy-notice">DCB uses the details you submit to respond to your quote request. <Link href="/privacy-policy/" target="_blank" rel="noopener noreferrer" aria-label="Privacy policy (opens in a new tab)">Privacy policy</Link>.</p>
     <form onSubmit={submit} noValidate={step === 2}>
       {step < 2 ? quoteFields.slice(step === 0 ? 0 : 3, step === 0 ? 3 : undefined).map(field => <div key={field.key} className="quote-field">
         <label htmlFor={`quote-${field.key}`}>{field.label}</label><input id={`quote-${field.key}`} name={field.key} type={field.type || "text"} autoComplete={field.autoComplete || "off"} placeholder={field.placeholder} value={details[field.key]} onChange={event => update(field.key, event.target.value)} required minLength={field.key === "model" ? 1 : 2} maxLength={field.max} aria-invalid={!!errors[field.key]} aria-describedby={errors[field.key] ? `error-${field.key}` : undefined} />

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { createContext, useContext, useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { ArrowRight, Check, MessageCircle, X } from "lucide-react";
 import { categories, whatsapp } from "@/lib/data";
@@ -28,7 +29,7 @@ export function EnquiryForm({ initialPart = "", compact = false }: { initialPart
     <details className="extra-vehicle-details"><summary>Contact & technical details <span>(optional)</span></summary><div className="extra-details-fields"><div className="form-row"><label>Email address<input type="email" name="email" autoComplete="email" maxLength={160} /></label><label>Phone number<input type="tel" name="phone" autoComplete="tel" maxLength={40} /></label></div><div className="form-row"><label>Vehicle year<input name="year" inputMode="numeric" maxLength={4} placeholder="e.g. 2014" /></label><label>Voltage<select name="voltage" defaultValue=""><option value="">Not sure</option><option>12V</option><option>24V</option><option>Other</option></select></label><label>Fuel<select name="fuel" defaultValue=""><option value="">Not sure</option><option>Petrol</option><option>Diesel</option><option>Electric / hybrid</option></select></label></div><div className="form-row"><label>Number of pins<input name="pins" inputMode="numeric" maxLength={3} /></label><label>Number of teeth<input name="teeth" inputMode="numeric" maxLength={3} /></label></div></div></details>
     <label>Anything else?<textarea name="details" placeholder="Quantity, engine details, or what you need help with…" rows={3} maxLength={1200} /></label>
     <button className="button button-primary" type="submit">Prepare WhatsApp enquiry<ArrowRight size={17} /></button>
-    <p className="form-note">Your details stay in this page until you choose to open WhatsApp. You can add a photo of your part there.</p>
+    <p className="form-note privacy-notice">Your details stay in this page until you choose to open WhatsApp. You can add a photo of your part there. <Link href="/privacy-policy/" target="_blank" rel="noopener noreferrer" aria-label="Privacy policy (opens in a new tab)">Privacy policy</Link>.</p>
   </form></>;
 }
 

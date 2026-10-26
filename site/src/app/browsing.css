@@ -2,6 +2,10 @@
 :root { --navigation-height: 88px; }
 html { scroll-padding-top: calc(var(--navigation-height) + 20px); }
 .mobile-actions { display: none; }
+.privacy-notice, .assistant-quote > p.privacy-notice { color: #b2b4c0; font-size: 12px; line-height: 1.8; }
+.privacy-notice a { color: #f1a9b2; text-decoration: underline; text-underline-offset: 3px; }
+.privacy-notice a:hover { color: #fff; }
+.footer-bottom .footer-privacy-link { min-height: 44px; font-size: 12px; color: #c1c3cd; }
 .catalogue-top { scroll-margin-top: 0; }
 .catalogue-sticky-search { position: sticky; top: var(--navigation-height); z-index: 25; display: flex; align-items: center; gap: 12px; padding-block: 10px; margin-bottom: 20px; background: #090a0cf5; backdrop-filter: blur(12px); }
 .catalogue-search { flex: 1; min-width: 0; }
