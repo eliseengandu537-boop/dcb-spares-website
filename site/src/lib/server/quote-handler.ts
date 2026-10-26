@@ -1,10 +1,12 @@
 import { createHash, randomUUID } from "node:crypto";
 import { validateQuote, type QuoteDetails } from "../quote";
 import { DeliveryUnavailable, type MailConfig } from "./quote-delivery";
+import { InvalidQuotePhoto, readQuotePhoto, type QuotePhotoAttachment } from "./quote-photo";
+import { maxUploadPhotoBytes } from "../quote-photo";
 
 type Dependencies = {
   getConfig: () => MailConfig | undefined;
-  deliver: (details: QuoteDetails, reference: string, config: MailConfig) => Promise<void>;
+  deliver: (details: QuoteDetails, reference: string, config: MailConfig, photo?: QuotePhotoAttachment) => Promise<void>;
   now?: () => number;
 };
 const response = (data: object, status: number) => Response.json(data, { status, headers: { "Cache-Control": "no-store" } });
@@ -12,7 +14,10 @@ const tenMinutes = 600_000;
 const maxBytes = 12_000;
 
 async function readBody(request: Request) {
-  if (Number(request.headers.get("content-length") || 0) > maxBytes) throw new RangeError("Request too large");
+  const contentType = request.headers.get("content-type") || "";
+  const multipart = contentType.startsWith("multipart/form-data");
+  const limit = multipart ? maxUploadPhotoBytes + 16_384 : maxBytes;
+  if (Number(request.headers.get("content-length") || 0) > limit) throw new RangeError("Request too large");
   const reader = request.body?.getReader();
   if (!reader) throw new SyntaxError("Missing request");
   const chunks: Uint8Array[] = [];
@@ -21,10 +26,17 @@ async function readBody(request: Request) {
     const { done, value } = await reader.read();
     if (done) break;
     length += value.byteLength;
-    if (length > maxBytes) { await reader.cancel(); throw new RangeError("Request too large"); }
+    if (length > limit) { await reader.cancel(); throw new RangeError("Request too large"); }
     chunks.push(value);
   }
-  return JSON.parse(Buffer.concat(chunks).toString("utf8")) as Record<string, unknown>;
+  const buffer = Buffer.concat(chunks);
+  if (!multipart) return { input: JSON.parse(buffer.toString("utf8")) as Record<string, unknown>, photo: undefined };
+  const form = await new Response(buffer, { headers: { "Content-Type": contentType } }).formData();
+  const quote = form.get("quote");
+  if (typeof quote !== "string" || quote.length > maxBytes || form.getAll("quote").length !== 1) throw new SyntaxError("Invalid quote");
+  const photo = form.get("photo");
+  if ((photo !== null && !(photo instanceof File)) || form.getAll("photo").length > 1) throw new InvalidQuotePhoto("Please attach one JPG, PNG or WebP photo.");
+  return { input: JSON.parse(quote) as Record<string, unknown>, photo: photo ?? undefined };
 }
 
 export function createQuoteHandler({ getConfig, deliver, now = Date.now }: Dependencies) {
@@ -39,10 +51,15 @@ export function createQuoteHandler({ getConfig, deliver, now = Date.now }: Depen
     // actual Host header, which browser JavaScript cannot override.
     const expectedOrigin = `${url.protocol}//${request.headers.get("host") || url.host}`;
     if (!origin || origin !== expectedOrigin) return response({ error: "Please submit your quote from the DCB website." }, 403);
-    if (!request.headers.get("content-type")?.startsWith("application/json")) return response({ error: "Please send a valid quote request." }, 415);
+    const contentType = request.headers.get("content-type") || "";
+    if (!contentType.startsWith("application/json") && !contentType.startsWith("multipart/form-data")) return response({ error: "Please send a valid quote request." }, 415);
     let input: Record<string, unknown>;
-    try { input = await readBody(request); }
-    catch (error) { return response({ error: "Please check your quote details and try again." }, error instanceof RangeError ? 413 : 400); }
+    let uploadedPhoto: File | undefined;
+    try { ({ input, photo: uploadedPhoto } = await readBody(request)); }
+    catch (error) {
+      if (error instanceof InvalidQuotePhoto) return response({ error: error.message, photoError: error.message }, 400);
+      return response({ error: error instanceof RangeError ? "This request is too large. Choose a smaller photo or continue without one." : "Please check your quote details and try again." }, error instanceof RangeError ? 413 : 400);
+    }
     if (!input || typeof input !== "object" || input.website) return response({ error: "Please check your quote details." }, 400);
     const { data, errors } = validateQuote(input);
     if (!data) return response({ error: "Please check the highlighted details.", fields: errors }, 400);
@@ -52,7 +69,8 @@ export function createQuoteHandler({ getConfig, deliver, now = Date.now }: Depen
     const time = now();
     for (const [key, value] of requests) if (value.expires <= time) requests.delete(key);
     for (const [key, value] of customers) if (value.expires <= time) customers.delete(key);
-    const digest = createHash("sha256").update(JSON.stringify(data)).digest("hex");
+    const photoBytes = uploadedPhoto ? Buffer.from(await uploadedPhoto.arrayBuffer()) : undefined;
+    const digest = createHash("sha256").update(JSON.stringify(data)).update(uploadedPhoto?.type ?? "").update(photoBytes ?? "").digest("hex");
     const existing = requests.get(input.requestId);
     if (existing) {
       if (existing.digest !== digest) return response({ error: "The details changed. Please review and submit a new quote." }, 409);
@@ -66,8 +84,14 @@ export function createQuoteHandler({ getConfig, deliver, now = Date.now }: Depen
     customers.set(customer, { count: (attempts?.count ?? 0) + 1, expires: attempts?.expires ?? time + tenMinutes });
     const reference = `DCB-${randomUUID().slice(0, 8).toUpperCase()}`;
     const result = (async () => {
+      let photo: QuotePhotoAttachment | undefined;
+      try { if (uploadedPhoto && photoBytes) photo = await readQuotePhoto(uploadedPhoto, photoBytes); }
+      catch (error) {
+        const message = error instanceof InvalidQuotePhoto ? error.message : "The photo could not be processed. Please try another image.";
+        return response({ error: message, photoError: message }, 400);
+      }
       try {
-        await deliver(data, reference, config);
+        await deliver(data, reference, config, photo);
         return response({ status: "submitted", reference }, 202);
       } catch (error) {
         // Keep the outcome for this request ID so a network retry cannot send twice.

@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
         <section id="information"><h2>02 <span>Information we collect</span></h2>
           <p>You can browse our catalogue without creating an account. Information collected depends on how you contact us:</p>
           <ul>
-            <li><strong>Quote requests:</strong> your name, email, phone number, company or location, the part you need, and your vehicle make and model.</li>
+            <li><strong>Quote requests:</strong> your name, email, phone number, company or location, the item you need, and any vehicle details or optional item photograph you choose to provide.</li>
             <li><strong>WhatsApp enquiries:</strong> details you choose to include, such as part numbers, vehicle specifications, preferred branch, quantities and messages. You may also share photographs directly in WhatsApp.</li>
             <li><strong>Correspondence:</strong> messages and contact details you send to our team by email or WhatsApp.</li>
             <li><strong>Technical information:</strong> our hosting provider may process IP addresses, browser and device details, requested pages, timestamps and security or error information when serving the website.</li>
@@ -67,7 +67,7 @@ export default function PrivacyPolicyPage() {
 
         <section id="assist-and-whatsapp"><h2>04 <span>DCB Assist & WhatsApp</span></h2>
           <p><strong>Ordinary chat:</strong> DCB Assist uses predefined replies and catalogue matching in your browser. Chat messages are not sent to an external AI model. Use “Start a new conversation” or reload the website to clear the ordinary chat history; simply closing the assistant does not clear it.</p>
-          <p><strong>Submitting a quote:</strong> the quote form is separate from ordinary chat. When you select “Submit quote request”, its details are sent to our server for delivery to the sales team by email. If submission cannot be confirmed, the form offers WhatsApp and email alternatives.</p>
+          <p><strong>Submitting a quote:</strong> the quote form is separate from ordinary chat. When you select “Submit quote request”, its details and any attached photo are sent to our server for delivery to the sales team by email. Photos are resized for sending and re-encoded to remove embedded metadata such as location tags. They are not published in a public image gallery. If submission cannot be confirmed, the form offers WhatsApp and email alternatives.</p>
           <p><strong>Opening WhatsApp or email:</strong> preparing an enquiry creates a draft in your browser. Following a WhatsApp link shares the prefilled text with WhatsApp to open that draft; you then choose whether to send it to DCB. An email link opens a draft in your email application for you to review and send. These services handle information under their own privacy terms.</p>
         </section>
 
@@ -85,7 +85,7 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section id="storage"><h2>07 <span>Storage & security</span></h2>
-          <p>The website does not maintain a customer-account database or a stored ordinary-chat transcript. The quote service temporarily keeps identifiers and records used to limit repeat requests. Submitted enquiries can remain in DCB’s email or messaging records, including service-provider backups.</p>
+          <p>The website does not maintain a customer-account database or a stored ordinary-chat transcript. The quote service temporarily keeps identifiers and records used to limit repeat requests. Submitted enquiries and attached photos can remain in DCB’s email or messaging records, including service-provider backups.</p>
           <p>Retention depends on the enquiry, any resulting transaction, and applicable record-keeping requirements. POPIA limits retention to what is necessary or otherwise lawfully permitted. Ask DCB about retention or deletion of your particular records; clearing your browser does not delete a message already sent.</p>
           <p>The site uses encrypted connections and protections against abusive submissions. No online service can guarantee absolute security. Report suspected misuse of your information using the DCB contact details above.</p>
         </section>

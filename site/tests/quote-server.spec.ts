@@ -4,6 +4,10 @@ import { createQuoteHandler } from "../src/lib/server/quote-handler";
 import { buildQuoteEmail, deliverQuote, getMailConfig, type MailConfig } from "../src/lib/server/quote-delivery";
 import { salesContacts } from "../src/lib/business";
 import type { QuoteDetails } from "../src/lib/quote";
+import { quoteText } from "../src/lib/quote";
+import { maxUploadPhotoBytes } from "../src/lib/quote-photo";
+import type { QuotePhotoAttachment } from "../src/lib/server/quote-photo";
+import sharp from "sharp";
 
 const details: QuoteDetails = {
   part: "2 aftermarket starter motors, STR1246",
@@ -19,6 +23,79 @@ const request = (overrides: Record<string, unknown> = {}, origin = "http://local
   method: "POST",
   headers: { "Content-Type": "application/json", Origin: origin },
   body: JSON.stringify({ ...details, requestId: randomUUID(), ...overrides }),
+});
+
+function photoRequest(bytes: Buffer, type = "image/jpeg", requestId = randomUUID(), extraPhoto = false) {
+  const form = new FormData();
+  form.append("quote", JSON.stringify({ ...details, part: "10 work light bulbs\n24 V", make: "", model: "", requestId }));
+  form.append("photo", new Blob([new Uint8Array(bytes)], { type }), "../../customer-photo.jpg");
+  if (extraPhoto) form.append("photo", new Blob([new Uint8Array(bytes)], { type }), "second.jpg");
+  return new Request("http://localhost:3001/api/quotes/", { method: "POST", headers: { Origin: "http://localhost:3001" }, body: form });
+}
+
+test("general items need no vehicle information and retain multiline descriptions", async () => {
+  let received: QuoteDetails | undefined;
+  const handler = createQuoteHandler({ getConfig: () => config, deliver: async value => { received = value; } });
+  const result = await handler(request({ make: undefined, model: undefined, part: "10 work light bulbs\n24 V" }));
+  expect(result.status).toBe(202);
+  expect(received).toMatchObject({ make: "", model: "", part: "10 work light bulbs\n24 V" });
+  expect(quoteText(received!)).not.toContain("Vehicle make");
+  const email = buildQuoteEmail(received!, "DCB-BULBS", config.sender);
+  expect(email.subject).toContain("10 work light bulbs 24 V");
+  expect(email.subject).not.toContain("\n");
+  expect(email.attachments).toBeUndefined();
+});
+
+test("photo quotes deliver a private metadata-free attachment and deduplicate retries", async () => {
+  const original = await sharp({ create: { width: 80, height: 60, channels: 3, background: "#ef3344" } }).withMetadata({ orientation: 6 }).jpeg().toBuffer();
+  let photo: QuotePhotoAttachment | undefined;
+  let received: QuoteDetails | undefined;
+  let deliveries = 0;
+  const handler = createQuoteHandler({ getConfig: () => config, deliver: async (value, _reference, _config, attachment) => { received = value; photo = attachment; deliveries++; } });
+  const requestId = randomUUID();
+  const [first, retry] = await Promise.all([handler(photoRequest(original, "image/jpeg", requestId)), handler(photoRequest(original, "image/jpeg", requestId))]);
+  expect(first.status).toBe(202);
+  expect(await first.json()).toEqual(await retry.json());
+  expect(deliveries).toBe(1);
+  expect(photo?.filename).toBe("quote-photo.jpg");
+  const metadata = await sharp(photo!.content).metadata();
+  expect(metadata).toMatchObject({ format: "jpeg", width: 60, height: 80 });
+  expect(metadata.exif).toBeUndefined();
+  expect(metadata.icc).toBeUndefined();
+  expect(metadata.xmp).toBeUndefined();
+  let sentPhoto: unknown;
+  await deliverQuote(received!, "DCB-PHOTO", config, photo, () => ({ sendMail: async mail => {
+    expect(mail.to).toEqual(salesContacts.map(contact => ({ name: contact.name, address: contact.email })));
+    sentPhoto = mail.attachments?.[0];
+    return { accepted: salesContacts.map(contact => contact.email), rejected: [] };
+  } }));
+  expect(sentPhoto).toEqual(photo);
+  const different = await sharp({ create: { width: 20, height: 20, channels: 3, background: "white" } }).jpeg().toBuffer();
+  expect((await handler(photoRequest(different, "image/jpeg", requestId))).status).toBe(409);
+});
+
+test("invalid, oversized, disguised and multiple photo uploads never send mail", async () => {
+  let deliveries = 0;
+  const makeHandler = () => createQuoteHandler({ getConfig: () => config, deliver: async () => { deliveries++; } });
+  for (const [bytes, type] of [[Buffer.from("not an image"), "image/jpeg"], [Buffer.from("<svg><script>alert(1)</script></svg>"), "image/jpeg"], [Buffer.from("<svg/>"), "image/svg+xml"]] as const) {
+    const result = await makeHandler()(photoRequest(bytes, type));
+    expect(result.status).toBe(400);
+    expect(await result.json()).toHaveProperty("photoError");
+  }
+  // Model incoming bytes directly: Node's outgoing FormData stream can throw
+  // asynchronously if cancelled while it is still encoding an oversized file.
+  const oversized = new Request("http://localhost:3001/api/quotes/", {
+    method: "POST", headers: { Origin: "http://localhost:3001", "Content-Type": "multipart/form-data; boundary=test" },
+    body: Buffer.alloc(maxUploadPhotoBytes + 20_000),
+  });
+  expect((await makeHandler()(oversized)).status).toBe(413);
+  const image = await sharp({ create: { width: 20, height: 20, channels: 3, background: "white" } }).png().toBuffer();
+  expect((await makeHandler()(photoRequest(image, "image/png", randomUUID(), true))).status).toBe(400);
+  expect((await makeHandler()(photoRequest(image, "image/jpeg"))).status).toBe(400);
+  const crossOrigin = photoRequest(image, "image/png");
+  crossOrigin.headers.set("origin", "https://unrelated.example");
+  expect((await makeHandler()(crossOrigin)).status).toBe(403);
+  expect(deliveries).toBe(0);
 });
 
 test("email includes every supplied detail, all four fixed sales contacts and the customer's reply-to", () => {
@@ -100,8 +177,8 @@ test("missing mail configuration and sending failures never return success", asy
 
 test("mail success requires acceptance for all four sales recipients", async () => {
   const accepted = salesContacts.map(contact => contact.email);
-  await expect(deliverQuote(details, "DCB-TEST", config, () => ({ sendMail: async () => ({ accepted, rejected: [] }) }))).resolves.toBeUndefined();
-  await expect(deliverQuote(details, "DCB-TEST", config, () => ({ sendMail: async () => ({ accepted: accepted.slice(0, 3), rejected: [accepted[3]] }) }))).rejects.toThrow("not confirmed");
+  await expect(deliverQuote(details, "DCB-TEST", config, undefined, () => ({ sendMail: async () => ({ accepted, rejected: [] }) }))).resolves.toBeUndefined();
+  await expect(deliverQuote(details, "DCB-TEST", config, undefined, () => ({ sendMail: async () => ({ accepted: accepted.slice(0, 3), rejected: [accepted[3]] }) }))).rejects.toThrow("not confirmed");
 });
 
 test("repeat submissions are rate limited and the window expires", async () => {

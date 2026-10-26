@@ -1,4 +1,5 @@
 import { test, expect, type Locator } from "@playwright/test";
+import sharp from "sharp";
 
 test("demo assistant finds real products and opens their details",async({page})=>{
   await page.goto("/");
@@ -15,16 +16,25 @@ test("demo assistant finds real products and opens their details",async({page})=
   await expect(page.getByRole("heading",{level:1})).toContainText("Toyota D4D");
 });
 
-async function completeQuote(assistant: Locator) {
+async function completeQuote(assistant: Locator, options: { general?: boolean; photo?: boolean } = {}) {
   await assistant.getByRole("button", { name: "How do I get a quote?" }).click();
-  await expect(assistant.getByRole("log")).toContainText("Send DCB your vehicle make and model. You can also chat with our team below on WhatsApp.");
+  await expect(assistant.getByRole("log")).toContainText("vehicle details are optional");
   await expect(assistant.getByRole("link", { name: "Chat on WhatsApp", exact: true })).toHaveAttribute("href", /wa\.me\/27836303818/);
   await assistant.getByRole("button", { name: "Request with DCB Assist" }).click();
   await assistant.getByRole("button", { name: "Continue", exact: true }).click();
   expect(await assistant.getByLabel("What do you need a quote for?").evaluate((element: HTMLInputElement) => element.validity.valueMissing)).toBeTruthy();
-  await assistant.getByLabel("What do you need a quote for?").fill("Two aftermarket starters, STR1246");
-  await assistant.getByLabel("Vehicle make", { exact: true }).fill("Toyota");
-  await assistant.getByLabel("Vehicle model", { exact: true }).fill("Hilux 3.0, 2014");
+  await assistant.getByLabel("What do you need a quote for?").fill(options.general ? "10 light bulbs\n24 V, part number unknown" : "Two aftermarket starters, STR1246");
+  await expect(assistant.getByLabel("Vehicle make", { exact: true })).not.toBeVisible();
+  if (!options.general) {
+    await assistant.locator(".quote-vehicle-details summary").click();
+    await assistant.getByLabel("Vehicle make", { exact: true }).fill("Toyota");
+    await assistant.getByLabel("Vehicle model", { exact: true }).fill("Hilux 3.0, 2014");
+  }
+  if (options.photo) {
+    const buffer = await sharp({ create: { width: 80, height: 60, channels: 3, background: "#ef3344" } }).png().toBuffer();
+    await assistant.locator("#quote-photo").setInputFiles({ name: "bulb.png", mimeType: "image/png", buffer });
+    await expect(assistant.getByRole("img", { name: "Photo supplied with this quote" })).toBeVisible();
+  }
   await assistant.getByRole("button", { name: "Continue", exact: true }).click();
   await assistant.getByLabel("Your name", { exact: true }).fill("Test Customer");
   await assistant.getByLabel("Email address", { exact: true }).fill("customer@example.invalid");
@@ -60,6 +70,73 @@ test("DCB Assist collects, reviews and submits a quote with both contact options
   });
   expect(submitted).not.toHaveProperty("to");
   expect(await assistant.evaluate(element => element.scrollWidth <= element.clientWidth)).toBeTruthy();
+});
+
+test("a bulb quote can be submitted without a vehicle or photo", async ({ page }) => {
+  let submitted: Record<string, unknown> | undefined;
+  await page.route("**/api/quotes/", async route => {
+    submitted = route.request().postDataJSON();
+    await route.fulfill({ status: 202, contentType: "application/json", body: JSON.stringify({ status: "submitted", reference: "DCB-BULBTEST" }) });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open DCB Assist" }).click();
+  const assistant = page.getByRole("dialog", { name: "DCB Assist" });
+  await completeQuote(assistant, { general: true });
+  await expect(assistant.locator(".quote-review")).not.toContainText("Vehicle make");
+  await assistant.getByRole("button", { name: "Submit quote request" }).click();
+  await expect(assistant.getByRole("heading", { name: "Your quote request is submitted." })).toBeVisible();
+  expect(submitted).toMatchObject({ part: "10 light bulbs\n24 V, part number unknown", make: "", model: "" });
+});
+
+test("an optional photo survives review and failed delivery and is sent with the quote", async ({ page }) => {
+  let attempts = 0;
+  let uploaded: File | undefined;
+  const quotes: Record<string, unknown>[] = [];
+  await page.route("**/api/quotes/", async route => {
+    const form = await new Response(new Uint8Array(route.request().postDataBuffer()!), { headers: { "Content-Type": route.request().headers()["content-type"] } }).formData();
+    uploaded = form.get("photo") as File;
+    quotes.push(JSON.parse(String(form.get("quote"))));
+    attempts++;
+    await route.fulfill({ status: attempts === 1 ? 503 : 202, contentType: "application/json", body: JSON.stringify(attempts === 1 ? { error: "Sending is temporarily unavailable." } : { status: "submitted", reference: "DCB-PHOTOTEST" }) });
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Open DCB Assist" }).click();
+  const assistant = page.getByRole("dialog", { name: "DCB Assist" });
+  await completeQuote(assistant, { general: true, photo: true });
+  await expect(assistant.getByRole("img", { name: "Photo supplied with this quote" })).toBeVisible();
+  await assistant.getByRole("button", { name: "Back", exact: true }).click();
+  await assistant.getByRole("button", { name: "Back", exact: true }).click();
+  await expect(assistant.getByRole("img", { name: "Photo supplied with this quote" })).toBeVisible();
+  await assistant.getByRole("button", { name: "Continue", exact: true }).click();
+  await assistant.getByRole("button", { name: "Continue", exact: true }).click();
+  await assistant.getByRole("button", { name: "Submit quote request" }).click();
+  await expect(assistant.getByRole("alert")).toContainText("The photo is not included in these links");
+  await expect(assistant.getByRole("img", { name: "Photo supplied with this quote" })).toBeVisible();
+  await assistant.getByRole("button", { name: "Submit quote request" }).click();
+  await expect(assistant.getByRole("heading", { name: "Your quote request is submitted." })).toBeVisible();
+  await expect(assistant).toContainText("Your photo is attached to the quote email");
+  expect(quotes[0]).toMatchObject({ make: "", model: "" });
+  expect(quotes[1].requestId).toBe(quotes[0].requestId);
+  expect(uploaded?.type).toBe("image/jpeg");
+  expect(uploaded!.size).toBeLessThan(3 * 1024 * 1024);
+  expect((await sharp(Buffer.from(await uploaded!.arrayBuffer())).metadata()).format).toBe("jpeg");
+});
+
+test("invalid photos are explained and an attached photo can be removed", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: "Get a quote with DCB Assist" }).click();
+  const assistant = page.getByRole("dialog", { name: "DCB Assist" });
+  await assistant.getByLabel("What do you need a quote for?").fill("A replacement work light");
+  await assistant.locator("#quote-photo").setInputFiles({ name: "not-a-photo.svg", mimeType: "image/svg+xml", buffer: Buffer.from("<svg/>") });
+  await expect(assistant.getByRole("alert")).toContainText("Choose a JPG, PNG or WebP photo");
+  await assistant.getByRole("button", { name: "Continue without a photo" }).click();
+  const buffer = await sharp({ create: { width: 20, height: 20, channels: 3, background: "white" } }).png().toBuffer();
+  await assistant.locator("#quote-photo").setInputFiles({ name: "light.png", mimeType: "image/png", buffer });
+  await expect(assistant.getByRole("img", { name: "Photo supplied with this quote" })).toBeVisible();
+  await assistant.getByRole("button", { name: "Remove photo", exact: true }).click();
+  await expect(assistant.getByRole("img", { name: "Photo supplied with this quote" })).toHaveCount(0);
+  await assistant.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(assistant.getByLabel("Your name", { exact: true })).toBeVisible();
 });
 
 test("an unavailable mail service preserves the quote and offers accurate WhatsApp and email fallbacks", async ({ page }) => {

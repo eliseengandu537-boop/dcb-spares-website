@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import type Mail from "nodemailer/lib/mailer";
 import { quoteText, type QuoteDetails } from "../quote";
 import { salesContacts } from "../business";
+import type { QuotePhotoAttachment } from "./quote-photo";
 
 export type MailConfig = {
   sender: string;
@@ -22,13 +23,15 @@ export function getMailConfig(env: Record<string, string | undefined>): MailConf
   return pass ? { sender, auth: { user: sender, pass } } : undefined;
 }
 
-export function buildQuoteEmail(details: QuoteDetails, reference: string, sender: string): Mail.Options {
+export function buildQuoteEmail(details: QuoteDetails, reference: string, sender: string, photo?: QuotePhotoAttachment): Mail.Options {
+  const description = [details.make, details.model].filter(Boolean).join(" ") || details.part.replace(/\s+/g, " ");
   return {
     from: { name: "DCB Assist", address: sender },
     to: salesContacts.map(contact => ({ name: contact.name, address: contact.email })),
     replyTo: { name: details.name, address: details.email },
-    subject: `DCB quote ${reference} — ${details.make} ${details.model}`.slice(0, 230),
-    text: quoteText(details, reference),
+    subject: `DCB quote ${reference} — ${description}`.slice(0, 230),
+    text: quoteText(details, reference) + (photo ? "\n\nCustomer photo: attached to this email." : ""),
+    attachments: photo ? [photo] : undefined,
     disableFileAccess: true,
     disableUrlAccess: true,
   };
@@ -45,10 +48,10 @@ const createTransport = (config: MailConfig): Transport => nodemailer.createTran
   debug: false,
 });
 
-export async function deliverQuote(details: QuoteDetails, reference: string, config: MailConfig, transportFactory = createTransport) {
+export async function deliverQuote(details: QuoteDetails, reference: string, config: MailConfig, photo?: QuotePhotoAttachment, transportFactory = createTransport) {
   const transport = transportFactory(config);
   try {
-    const receipt = await transport.sendMail(buildQuoteEmail(details, reference, config.sender));
+    const receipt = await transport.sendMail(buildQuoteEmail(details, reference, config.sender, photo));
     const accepted = receipt.accepted.map(item => (typeof item === "string" ? item : item.address || "").toLowerCase());
     if (receipt.rejected.length || !salesContacts.every(contact => accepted.includes(contact.email.toLowerCase()))) {
       throw new DeliveryFailed("Submission to all sales recipients was not confirmed");

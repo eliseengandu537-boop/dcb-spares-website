@@ -32,8 +32,14 @@ DCB Assist
   These guided replies need no AI API key or model installation.
   Chat history stays in page memory and can be cleared with the reset button.
   npm run dev/build refreshes public/assistant-catalogue.json automatically.
-  The quote form asks for the required part, vehicle make/model, customer
-  name, email, phone and company or location, then shows a review step.
+  The quote form asks what the customer needs, then their name, email,
+  phone and company or location. Vehicle make/model are optional.
+  A customer can add one JPG, PNG or WebP photo (up to 10 MB). The browser
+  prepares a smaller JPEG locally; the server validates and re-encodes it
+  without embedded metadata. Uploads are bounded to 3 MB and sent as email
+  attachments, not stored in a public gallery. The review shows the photo.
+  WhatsApp/email fallback links cannot include attachments; customers are
+  reminded to attach the photo manually in their messaging or email app.
   Submitting sends these details through the server to all four recipients:
     Hans@dcbspares.co.za
     Shane@dcbspares.co.za
