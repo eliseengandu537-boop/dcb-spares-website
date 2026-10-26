@@ -1,8 +1,10 @@
 import nodemailer from "nodemailer";
 import type Mail from "nodemailer/lib/mailer";
-import { quoteText, type QuoteDetails } from "../quote";
-import { getQuoteRouting, quoteAreaLabel, type QuoteTerritories } from "../quote-routing";
+import { randomUUID } from "node:crypto";
+import type { QuoteDetails } from "../quote";
+import { getQuoteRouting, type QuoteTerritories } from "../quote-routing";
 import type { QuotePhotoAttachment } from "./quote-photo";
+import { renderQuoteEmail } from "./quote-email-template";
 
 export type MailConfig = {
   sender: string;
@@ -26,20 +28,18 @@ export function getMailConfig(env: Record<string, string | undefined>): MailConf
   return pass ? { sender, auth: { user: sender, pass } } : undefined;
 }
 
-export function buildQuoteEmail(details: QuoteDetails, reference: string, sender: string, photo?: QuotePhotoAttachment, territories?: QuoteTerritories): Mail.Options {
-  const description = [details.make, details.model].filter(Boolean).join(" ") || details.part.replace(/\s+/g, " ");
+export function buildQuoteEmail(details: QuoteDetails, reference: string, sender: string, photo?: QuotePhotoAttachment, territories?: QuoteTerritories, receivedAt = new Date()): Mail.Options {
   const routing = getQuoteRouting(details.area, territories);
-  const assignment = routing.cc
-    ? `Sales owner: ${routing.to.name}. Gary is copied for coordination. Please coordinate any reassignment with Gary.`
-    : "Sales owner: Gary. Please assign this lead to one sales representative for the customer's area.";
+  const attachment = photo ? { ...photo, cid: `quote-photo.${randomUUID()}@dcbspares.co.za`, contentDisposition: "attachment" } : undefined;
+  const content = renderQuoteEmail(details, reference, routing, receivedAt, attachment);
   return {
     from: { name: "DCB Assist", address: sender },
     to: [{ name: routing.to.name, address: routing.to.email }],
     cc: routing.cc ? [{ name: routing.cc.name, address: routing.cc.email }] : undefined,
     replyTo: { name: details.name, address: details.email },
-    subject: `DCB quote ${reference} — ${quoteAreaLabel(details.area)} — ${description}`.slice(0, 230),
-    text: `${assignment}\n\n${quoteText(details, reference)}` + (photo ? "\n\nCustomer photo: attached to this email." : ""),
-    attachments: photo ? [photo] : undefined,
+    ...content,
+    date: receivedAt,
+    attachments: attachment ? [attachment] : undefined,
     disableFileAccess: true,
     disableUrlAccess: true,
   };

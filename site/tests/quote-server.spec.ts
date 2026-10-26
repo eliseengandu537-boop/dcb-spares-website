@@ -8,6 +8,7 @@ import { getQuoteRouting, quoteAreas, quoteAreaLabel, type QuoteTerritories } fr
 import { maxUploadPhotoBytes } from "../src/lib/quote-photo";
 import type { QuotePhotoAttachment } from "../src/lib/server/quote-photo";
 import sharp from "sharp";
+import nodemailer from "nodemailer";
 
 const details: QuoteDetails = {
   part: "2 aftermarket starter motors, STR1246",
@@ -71,7 +72,7 @@ test("photo quotes deliver a private metadata-free attachment and deduplicate re
     sentPhoto = mail.attachments?.[0];
     return { accepted: ["Gary@dcbspares.co.za"], rejected: [] };
   } }));
-  expect(sentPhoto).toEqual(photo);
+  expect(sentPhoto).toMatchObject({ ...photo, contentDisposition: "attachment" });
   const different = await sharp({ create: { width: 20, height: 20, channels: 3, background: "white" } }).jpeg().toBuffer();
   expect((await handler(photoRequest(different, "image/jpeg", requestId))).status).toBe(409);
 });
@@ -110,6 +111,63 @@ test("unassigned quotes go only to Gary with all supplied details and the custom
   expect(mail.text).toContain("DCB-TEST");
   expect(mail.disableFileAccess).toBe(true);
   expect(mail.disableUrlAccess).toBe(true);
+});
+
+test("formatted email retains every customer field and the full request in HTML and plain text", () => {
+  const supplied = { ...details, area: "gauteng", part: "2 starter motors, STR1246\nPlease confirm availability & delivery." };
+  const receivedAt = new Date("2026-10-26T08:30:00.000Z");
+  const mail = buildQuoteEmail(supplied, "DCB-FORMAT", config.sender, undefined, undefined, receivedAt);
+  for (const [key, value] of Object.entries(supplied)) {
+    expect(mail.text).toContain(key === "area" ? "Gauteng" : value);
+  }
+  expect(mail.html).toContain("2 starter motors, STR1246<br>Please confirm availability &amp; delivery.");
+  for (const value of ["Test Customer", "customer@example.invalid", "+27 82 123 4567", "Gauteng", "Test Workshop, Cape Town", "Toyota", "Hilux 3.0 D-4D, 2014", "DCB-FORMAT", "10:30 SAST", "Assigned to Sean", "Gary@dcbspares.co.za"]) {
+    expect(mail.html).toContain(value);
+  }
+  expect(mail.date).toEqual(receivedAt);
+  expect(mail.subject).toContain("2 starter motors, STR1246");
+  expect(mail.replyTo).toEqual({ name: supplied.name, address: supplied.email });
+  const general = buildQuoteEmail({ ...supplied, make: "", model: "", area: "not-sure" }, "DCB-GENERAL", config.sender);
+  expect(general.html).not.toContain("Vehicle details supplied");
+  expect(general.html).toContain("No photo supplied");
+  expect(general.html).toContain("Assigned to Gary");
+  expect(general.html).not.toContain("Sales coordination</p>");
+  expect(general.html).not.toContain("cid:");
+});
+
+test("HTML email escapes customer content instead of allowing injected markup or links", () => {
+  const quote = { ...details, name: 'Sam <img src=x onerror="alert(1)">', part: '<script>alert(1)</script>\nA & B "part"', email: 'a&subject=changed@example.invalid', companyOrLocation: '<a href="https://attacker.invalid">Workshop</a>' };
+  const mail = buildQuoteEmail(quote, "DCB-ESCAPE", config.sender);
+  expect(mail.html).not.toContain("<script>");
+  expect(mail.html).not.toContain("<img src=x");
+  expect(mail.html).not.toContain('<a href="https://attacker.invalid">');
+  expect(mail.html).toContain("&lt;script&gt;alert(1)&lt;/script&gt;<br>A &amp; B &quot;part&quot;");
+  expect(mail.html).toContain("mailto:a%26subject%3Dchanged@example.invalid?subject=Re%3A%20DCB%20quote%20DCB-ESCAPE");
+  expect(mail.text).toContain(quote.part);
+});
+
+test("real MIME message contains both email bodies and one downloadable embedded photo without sending", async () => {
+  const content = await sharp({ create: { width: 20, height: 20, channels: 3, background: "#d51f35" } }).jpeg().toBuffer();
+  const photo = { filename: "quote-photo.jpg", content, contentType: "image/jpeg" as const };
+  const mail = buildQuoteEmail({ ...details, area: "gauteng" }, "DCB-MIME", config.sender, photo);
+  const cid = mail.attachments?.[0].cid;
+  expect(cid).toMatch(/^quote-photo\.[a-f0-9-]+@dcbspares\.co\.za$/);
+  expect(mail.html).toContain(`src="cid:${cid}"`);
+  expect(mail.attachments).toHaveLength(1);
+  expect(mail.attachments?.[0].content).toEqual(content);
+  // Stream transport builds the actual SMTP payload locally; it has no network.
+  const transport = nodemailer.createTransport({ streamTransport: true, buffer: true, newline: "unix" });
+  const result = await transport.sendMail(mail);
+  const mime = result.message.toString();
+  expect(mime).toContain("multipart/alternative");
+  expect(mime).toContain("multipart/related");
+  expect(mime).toContain("text/plain; charset=utf-8");
+  expect(mime).toContain("text/html; charset=utf-8");
+  // SMTP headers may be folded onto continuation lines by the mail composer.
+  expect(mime.replace(/\r?\n[\t ]+/g, " ")).toContain(`Content-ID: <${cid}>`);
+  expect(mime).toContain("Content-Disposition: attachment; filename=quote-photo.jpg");
+  expect(result.envelope.to).toEqual(["Sean@dcbspares.co.za", "Gary@dcbspares.co.za"]);
+  transport.close();
 });
 
 test("valid submissions are delivered once, even with concurrent browser retries", async () => {
