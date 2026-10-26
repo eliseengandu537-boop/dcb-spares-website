@@ -16,7 +16,9 @@ export class DeliveryFailed extends Error {}
 
 export function getMailConfig(env: Record<string, string | undefined>): MailConfig | undefined {
   const sender = env.GMAIL_USER?.trim();
-  if (!sender || !/^[^\s@<>]+@dcbspares\.co\.za$/i.test(sender)) return undefined;
+  // The trusted server configuration identifies the authenticated sending
+  // account. It can be Gmail or Workspace; DCB recipients are resolved below.
+  if (!sender || !/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(sender)) return undefined;
   if (env.GMAIL_CLIENT_ID && env.GMAIL_CLIENT_SECRET && env.GMAIL_REFRESH_TOKEN) {
     return { sender, auth: { type: "OAuth2", user: sender, clientId: env.GMAIL_CLIENT_ID, clientSecret: env.GMAIL_CLIENT_SECRET, refreshToken: env.GMAIL_REFRESH_TOKEN } };
   }

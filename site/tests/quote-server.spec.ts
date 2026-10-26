@@ -257,10 +257,26 @@ test("repeat submissions are rate limited and the window expires", async () => {
   expect(deliveries).toBe(4);
 });
 
-test("Google Workspace supports either app passwords or OAuth without falling back to an unconfigured sender", () => {
+test("Gmail and Workspace support either app passwords or OAuth with a valid authenticated sender", () => {
   expect(getMailConfig({})).toBeUndefined();
   expect(getMailConfig({ GMAIL_USER: "quotes@dcbspares.co.za" })).toBeUndefined();
-  expect(getMailConfig({ GMAIL_USER: "external@example.invalid", GMAIL_APP_PASSWORD: "fake" })).toBeUndefined();
+  expect(getMailConfig({ GMAIL_USER: "invalid-address", GMAIL_APP_PASSWORD: "fake" })).toBeUndefined();
+  expect(getMailConfig({ GMAIL_USER: "sender@gmail.com\r\nBcc: attacker@example.invalid", GMAIL_APP_PASSWORD: "fake" })).toBeUndefined();
   expect(getMailConfig({ GMAIL_USER: config.sender, GMAIL_APP_PASSWORD: "test only password" })?.auth).toEqual({ user: config.sender, pass: "testonlypassword" });
   expect(getMailConfig({ GMAIL_USER: config.sender, GMAIL_CLIENT_ID: "id", GMAIL_CLIENT_SECRET: "secret", GMAIL_REFRESH_TOKEN: "refresh" })?.auth).toEqual({ type: "OAuth2", user: config.sender, clientId: "id", clientSecret: "secret", refreshToken: "refresh" });
+});
+
+test("a configured personal Gmail sender preserves the area rep, Gary CC and customer reply-to", async () => {
+  const sender = "website.sender@gmail.com";
+  expect(getMailConfig({ GMAIL_USER: sender })).toBeUndefined();
+  const gmailConfig = getMailConfig({ GMAIL_USER: sender, GMAIL_APP_PASSWORD: "test only password" });
+  expect(gmailConfig?.auth).toEqual({ user: sender, pass: "testonlypassword" });
+  const quote = { ...details, area: "gauteng" };
+  await deliverQuote(quote, "DCB-GMAIL", gmailConfig!, undefined, () => ({ sendMail: async mail => {
+    expect(mail.from).toEqual({ name: "DCB Assist", address: sender });
+    expect(mail.to).toEqual([{ name: "Sean", address: "Sean@dcbspares.co.za" }]);
+    expect(mail.cc).toEqual([{ name: "Gary", address: "Gary@dcbspares.co.za" }]);
+    expect(mail.replyTo).toEqual({ name: quote.name, address: quote.email });
+    return { accepted: ["Sean@dcbspares.co.za", "Gary@dcbspares.co.za"], rejected: [] };
+  } }));
 });

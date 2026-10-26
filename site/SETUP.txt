@@ -61,17 +61,25 @@ Area routing
   map only from DCB's confirmed list, then rebuild and deploy the website.
   Tests check this confirmed map as well as test-only routing fixtures.
 
-Google Workspace email setup
+Google email setup (Gmail or Google Workspace)
+  The recipient list does not authorise sending. One authorised Google
+  sending account and its app password (or OAuth connection) are required.
+  The sender can be a personal Gmail account authorised by the website owner;
+  the sales recipients remain the assigned DCB representative with Gary CC'd.
+  DCB's public MX record points to Microsoft 365. That does not prevent
+  sending from an authorised Gmail account to DCB's Outlook mailboxes.
   site/.env.local is ready for your local settings and is ignored by Git.
   If starting a fresh checkout, copy .env.example to .env.local first.
   Keep credentials out of chat and source control.
 
-  Configure an authorised Google Workspace sending mailbox:
-    GMAIL_USER=your-sending-mailbox@dcbspares.co.za
+  Configure the Google account used to send the quotes:
+    GMAIL_USER=your-authorised-sending-address@gmail.com
     GMAIL_APP_PASSWORD=your-Google-app-password
 
   Use an app password, not the mailbox's normal password. App passwords
-  require 2-Step Verification and must be allowed by your Workspace admin.
+  require 2-Step Verification and must be allowed for that Google account.
+  Create one at https://myaccount.google.com/apppasswords using the sender's
+  Google account, with a label such as "DCB Website". Keep it out of chat.
   Alternatively, leave GMAIL_APP_PASSWORD blank and set all three:
     GMAIL_CLIENT_ID
     GMAIL_CLIENT_SECRET
@@ -83,6 +91,24 @@ Google Workspace email setup
 
   After saving .env.local, restart npm run preview (or the dev server).
   These are server-only settings; never add a NEXT_PUBLIC_ prefix.
+
+Live website email setup (Vercel)
+  .env.local configures localhost only; Git does not publish its values.
+  In Vercel, select the project named "site", which serves dcbspares.co.za.
+  Open Settings > Environment Variables and select Production.
+  Add the same GMAIL_USER and GMAIL_APP_PASSWORD values, or the complete
+  OAuth connection described above. Keep credentials private and use
+  Vercel's sensitive/secret setting for passwords and tokens.
+  Save, then redeploy the Production deployment. Existing deployments do
+  not receive newly added environment variables automatically.
+  Settings: https://vercel.com/eliseengandu537-boops-projects/site/settings/environment-variables
+  Documentation: https://vercel.com/docs/environment-variables/managing-environment-variables
+  If the form says "Online submission is not connected yet", the running
+  deployment does not have a usable sending configuration. Check the correct
+  project, Production scope, sending address, auth fields and redeployment.
+  A code push alone cannot supply missing mailbox credentials.
+
+Delivery verification
   No live email was sent during development verification. Once configured,
   submit an intentional test quote and confirm receipt in Gary's inbox and
   the assigned rep's inbox, if that area has an assigned rep.
