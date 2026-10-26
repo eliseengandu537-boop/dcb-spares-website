@@ -51,12 +51,15 @@ DCB Assist
 
 Area routing
   src/lib/quote-routing.ts contains quoteTerritories and the region options.
-  Assign one of Hans, Shane or Sean to each confirmed territory. The map is
-  currently empty because DCB has not provided the area-to-rep assignments.
+  DCB's confirmed territories are:
+    Shane: Western Cape, Northern Cape, Eastern Cape.
+    Hans: KwaZulu-Natal, Mpumalanga, Limpopo.
+    Sean: Gauteng, Free State, North West.
+  The area rep is the To recipient and Gary is always CC'd.
   Unassigned areas, "Not sure", and older forms without a region go to Gary.
   Do not infer territories from branch addresses or email names. Update this
   map only from DCB's confirmed list, then rebuild and deploy the website.
-  Tests exercise assigned areas using test-only mappings, not live ones.
+  Tests check this confirmed map as well as test-only routing fixtures.
 
 Google Workspace email setup
   site/.env.local is ready for your local settings and is ignored by Git.

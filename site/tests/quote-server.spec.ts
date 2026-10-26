@@ -212,6 +212,28 @@ test("confirmed territory routing chooses one rep, always copies Gary, and match
   }
 });
 
+test("the live territory map covers all nine provinces with DCB's confirmed owners", () => {
+  const expectedOwners = {
+    "western-cape": "Shane", "northern-cape": "Shane", "eastern-cape": "Shane",
+    "kwazulu-natal": "Hans", "mpumalanga": "Hans", "limpopo": "Hans",
+    "gauteng": "Sean", "free-state": "Sean", "north-west": "Sean",
+  };
+  for (const [area, owner] of Object.entries(expectedOwners)) {
+    const quote = { ...details, area };
+    const mail = buildQuoteEmail(quote, "DCB-CONFIRMED", config.sender);
+    expect(mail.to).toEqual([{ name: owner, address: `${owner}@dcbspares.co.za` }]);
+    expect(mail.cc).toEqual([{ name: "Gary", address: "Gary@dcbspares.co.za" }]);
+    const fallback = new URL(quoteEmailLink(quote));
+    expect(fallback.pathname).toBe(`${owner}@dcbspares.co.za`);
+    expect(fallback.searchParams.get("cc")).toBe("Gary@dcbspares.co.za");
+  }
+  for (const area of ["outside-sa", "not-sure"]) {
+    const mail = buildQuoteEmail({ ...details, area }, "DCB-ALLOCATE", config.sender);
+    expect(mail.to).toEqual([{ name: "Gary", address: "Gary@dcbspares.co.za" }]);
+    expect(mail.cc).toBeUndefined();
+  }
+});
+
 test("area validation supports older forms and never accepts customer-supplied recipients", async () => {
   const received: QuoteDetails[] = [];
   const handler = createQuoteHandler({ getConfig: () => config, deliver: async value => { received.push(value); } });

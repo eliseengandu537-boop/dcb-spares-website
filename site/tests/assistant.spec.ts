@@ -64,12 +64,15 @@ test("DCB Assist collects, reviews and submits a quote with both contact options
   const recipientLinks = assistant.locator(".quote-recipients a");
   await expect(recipientLinks).toHaveCount(routing.cc ? 2 : 1);
   await expect(assistant.locator('.quote-recipients a[href="mailto:Gary@dcbspares.co.za"]')).toBeVisible();
+  await expect(assistant.locator('.quote-recipients a[href="mailto:Shane@dcbspares.co.za"]')).toBeVisible();
   await expect(assistant.locator(".quote-review")).toContainText("Western Cape");
   await assistant.getByRole("button", { name: "Back", exact: true }).click();
   await expect(assistant.getByLabel("Your name", { exact: true })).toHaveValue("Test Customer");
   await assistant.getByLabel("Town / city", { exact: true }).fill("Alrode, Updated Workshop");
   await assistant.getByLabel("Province / region", { exact: true }).selectOption("gauteng");
   await assistant.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(assistant.locator('.quote-recipients a[href="mailto:Sean@dcbspares.co.za"]')).toBeVisible();
+  await expect(assistant.locator('.quote-recipients a[href="mailto:Shane@dcbspares.co.za"]')).toHaveCount(0);
   await assistant.getByRole("button", { name: "Submit quote request" }).click();
   await expect(assistant.getByRole("heading", { name: "Your quote request is submitted." })).toBeVisible();
   await expect(assistant).toContainText("DCB-TEST1234");
@@ -159,6 +162,8 @@ test("an unavailable mail service preserves the quote and offers accurate WhatsA
   await expect(assistant.getByRole("heading", { name: "Your quote request is submitted." })).toHaveCount(0);
   const email = await assistant.getByRole("link", { name: "Email the sales team" }).getAttribute("href");
   expect(decodeURIComponent(email!)).toContain("Gary@dcbspares.co.za");
+  expect(new URL(email!).pathname).toBe("Shane@dcbspares.co.za");
+  expect(new URL(email!).searchParams.get("cc")).toBe("Gary@dcbspares.co.za");
   expect(email).not.toContain("Hans@dcbspares.co.za,Shane@dcbspares.co.za");
   expect(decodeURIComponent(email!)).toContain("customer@example.invalid");
   const handoff = await assistant.getByRole("link", { name: "Send on WhatsApp" }).getAttribute("href");

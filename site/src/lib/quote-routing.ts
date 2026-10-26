@@ -18,9 +18,18 @@ type RegionalRep = Exclude<typeof salesContacts[number]["name"], "Gary">;
 export type QuoteTerritories = Partial<Record<Exclude<QuoteArea, "not-sure">, RegionalRep>>;
 export const quoteCoordinator = salesContacts.find(contact => contact.name === "Gary")!;
 
-// Only add territory assignments confirmed by DCB. Until then, Gary owns
-// unassigned leads and can allocate each one to a single sales representative.
-export const quoteTerritories: QuoteTerritories = {};
+// DCB-confirmed assignments. Gary coordinates areas without an assigned rep.
+export const quoteTerritories: QuoteTerritories = {
+  "western-cape": "Shane",
+  "northern-cape": "Shane",
+  "eastern-cape": "Shane",
+  "kwazulu-natal": "Hans",
+  "mpumalanga": "Hans",
+  "limpopo": "Hans",
+  "gauteng": "Sean",
+  "free-state": "Sean",
+  "north-west": "Sean",
+};
 
 export function isQuoteArea(area: string): area is QuoteArea {
   return Object.hasOwn(quoteAreas, area);
