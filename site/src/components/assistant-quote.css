@@ -14,9 +14,9 @@
 .quote-progress .is-active { color: #f5e8eb; }
 .quote-progress .is-active b { border-color: #ee526477; background: #ec3c5320; }
 .quote-field { display: grid; gap: 8px; margin-bottom: 16px; color: #c8cad4; font-size: 11px; }
-.quote-field input, .quote-field textarea { min-width: 0; width: 100%; background: #08090b; border: 1px solid #ffffff2a; border-radius: 6px; padding: 12px; color: #fff; font-size: 13px; }
+.quote-field input, .quote-field textarea, .quote-field select { min-width: 0; width: 100%; background: #08090b; border: 1px solid #ffffff2a; border-radius: 6px; padding: 12px; color: #fff; font-size: 13px; color-scheme: dark; }
 .quote-field textarea { resize: vertical; min-height: 105px; line-height: 1.65; }
-.quote-field input[aria-invalid="true"], .quote-field textarea[aria-invalid="true"] { border-color: #ff6477; }
+.quote-field :is(input, textarea, select)[aria-invalid="true"] { border-color: #ff6477; }
 .quote-photo { position: relative; margin-block: 18px; }
 .quote-photo > label { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 12px; min-height: 48px; border: 1px dashed #ffffff35; border-radius: 7px; background: #ffffff04; color: #e4e4ed; font-size: 12px; cursor: pointer; }
 .quote-photo > label svg { color: #f5a3ad; }
@@ -62,6 +62,6 @@
 .quote-confirmation > .button { font-size: 11px; gap: 10px; }
 .quote-confirmation > .text-link { display: flex; align-items: center; gap: 10px; margin-top: 22px; font-size: 11px; }
 @media(max-width:640px) {
-  .quote-field input, .quote-field textarea { font-size: 16px; }
+  .quote-field input, .quote-field textarea, .quote-field select { font-size: 16px; }
   .quote-field input::placeholder, .quote-field textarea::placeholder { font-size: 12px; }
 }

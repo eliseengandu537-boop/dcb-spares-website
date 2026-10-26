@@ -1,4 +1,4 @@
-import { salesContacts } from "./business";
+import { getQuoteRouting, isQuoteArea, quoteAreaLabel, type QuoteTerritories } from "./quote-routing";
 
 export type QuoteDetails = {
   part: string;
@@ -7,10 +7,11 @@ export type QuoteDetails = {
   name: string;
   email: string;
   phone: string;
+  area: string;
   companyOrLocation: string;
 };
 export type QuoteField = keyof QuoteDetails;
-export const emptyQuote: QuoteDetails = { part: "", make: "", model: "", name: "", email: "", phone: "", companyOrLocation: "" };
+export const emptyQuote: QuoteDetails = { part: "", make: "", model: "", name: "", email: "", phone: "", area: "", companyOrLocation: "" };
 export const quoteFields: { key: QuoteField; label: string; max: number; optional?: boolean; type?: string; autoComplete?: string; placeholder: string }[] = [
   { key: "part", label: "What do you need a quote for?", max: 500, placeholder: "e.g. 10 light bulbs, a work light, or a starter motor. Add a quantity or part number if you know it." },
   { key: "make", label: "Vehicle make", max: 100, optional: true, placeholder: "e.g. Toyota, if relevant" },
@@ -18,7 +19,8 @@ export const quoteFields: { key: QuoteField; label: string; max: number; optiona
   { key: "name", label: "Your name", max: 100, autoComplete: "name", placeholder: "Full name" },
   { key: "email", label: "Email address", max: 160, type: "email", autoComplete: "email", placeholder: "you@example.com" },
   { key: "phone", label: "Phone number", max: 40, type: "tel", autoComplete: "tel", placeholder: "Your contact number" },
-  { key: "companyOrLocation", label: "Company or location", max: 160, placeholder: "Company name or your town / area" },
+  { key: "area", label: "Province / region", max: 40, placeholder: "Choose your province or region" },
+  { key: "companyOrLocation", label: "Town / city", max: 160, placeholder: "Your town or city; add your company if applicable" },
 ];
 
 export function validateQuote(value: unknown): { data?: QuoteDetails; errors: Partial<Record<QuoteField, string>> } {
@@ -26,14 +28,20 @@ export function validateQuote(value: unknown): { data?: QuoteDetails; errors: Pa
   const data = { ...emptyQuote };
   const errors: Partial<Record<QuoteField, string>> = {};
   for (const field of quoteFields) {
-    const entry = typeof input[field.key] === "string" ? (input[field.key] as string).trim() : "";
+    // Older open browser tabs have no area field. Gary receives those leads.
+    const entry = field.key === "area" && input.area === undefined ? "not-sure" : typeof input[field.key] === "string" ? (input[field.key] as string).trim() : "";
     data[field.key] = entry;
     if (!field.optional && entry.length < 2) errors[field.key] = "Please complete this field.";
     else if (entry.length > field.max || (field.key === "part" ? /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/ : /[\u0000-\u001f\u007f]/).test(entry)) errors[field.key] = `Please check ${field.label.toLowerCase()}.`;
   }
+  if (!isQuoteArea(data.area)) errors.area = "Choose your province or region, or select ‘Not sure’.";
   if (!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(data.email)) errors.email = "Enter a valid email address.";
   if (!/^[+\d()\s.-]+$/.test(data.phone) || data.phone.replace(/\D/g, "").length < 7 || data.phone.replace(/\D/g, "").length > 15) errors.phone = "Enter a valid contact number.";
   return Object.keys(errors).length ? { errors } : { data, errors };
+}
+
+export function quoteFieldValue(field: QuoteField, details: QuoteDetails) {
+  return field === "area" ? quoteAreaLabel(details.area) : details[field];
 }
 
 export function quoteText(details: QuoteDetails, reference?: string) {
@@ -41,11 +49,12 @@ export function quoteText(details: QuoteDetails, reference?: string) {
     "DCB Assist — quote request",
     reference ? `Reference: ${reference}` : "",
     "",
-    ...quoteFields.filter(field => !field.optional || details[field.key]).map(field => `${field.label.replace("?", "")}: ${details[field.key]}`),
+    ...quoteFields.filter(field => !field.optional || details[field.key]).map(field => `${field.label.replace("?", "")}: ${quoteFieldValue(field.key, details)}`),
     "",
     "Please contact this customer about the items they need.",
   ].filter((line, index, all) => line || all[index - 1] !== "").join("\n");
 }
-export function quoteEmailLink(details: QuoteDetails) {
-  return `mailto:${salesContacts.map(contact => contact.email).join(",")}?subject=${encodeURIComponent("DCB Assist — parts quote request")}&body=${encodeURIComponent(quoteText(details))}`;
+export function quoteEmailLink(details: QuoteDetails, territories?: QuoteTerritories) {
+  const routing = getQuoteRouting(details.area, territories);
+  return `mailto:${routing.to.email}?subject=${encodeURIComponent("DCB Assist — parts quote request")}${routing.cc ? `&cc=${encodeURIComponent(routing.cc.email)}` : ""}&body=${encodeURIComponent(quoteText(details))}`;
 }

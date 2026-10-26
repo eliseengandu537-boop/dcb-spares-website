@@ -33,20 +33,30 @@ DCB Assist
   Chat history stays in page memory and can be cleared with the reset button.
   npm run dev/build refreshes public/assistant-catalogue.json automatically.
   The quote form asks what the customer needs, then their name, email,
-  phone and company or location. Vehicle make/model are optional.
+  phone, province/region and town/city (plus company, if applicable).
+  Vehicle make/model are optional.
   A customer can add one JPG, PNG or WebP photo (up to 10 MB). The browser
   prepares a smaller JPEG locally; the server validates and re-encodes it
   without embedded metadata. Uploads are bounded to 3 MB and sent as email
   attachments, not stored in a public gallery. The review shows the photo.
   WhatsApp/email fallback links cannot include attachments; customers are
   reminded to attach the photo manually in their messaging or email app.
-  Submitting sends these details through the server to all four recipients:
-    Hans@dcbspares.co.za
-    Shane@dcbspares.co.za
-    Gary@dcbspares.co.za
-    Sean@dcbspares.co.za
+  Gary@dcbspares.co.za receives every quote. If the customer's area has an
+  assigned representative, that representative is the To recipient and Gary
+  is CC'd on the same email. Otherwise Gary is the sole To recipient and
+  coordinates assignment manually. A quote never broadcasts to all reps.
+  The email fallback follows the same recipient rules.
   The customer's email is the Reply-To address. Recipient addresses are
-  fixed on the server and cannot be chosen by a website visitor.
+  resolved from trusted DCB assignments, not visitor-supplied email addresses.
+
+Area routing
+  src/lib/quote-routing.ts contains quoteTerritories and the region options.
+  Assign one of Hans, Shane or Sean to each confirmed territory. The map is
+  currently empty because DCB has not provided the area-to-rep assignments.
+  Unassigned areas, "Not sure", and older forms without a region go to Gary.
+  Do not infer territories from branch addresses or email names. Update this
+  map only from DCB's confirmed list, then rebuild and deploy the website.
+  Tests exercise assigned areas using test-only mappings, not live ones.
 
 Google Workspace email setup
   site/.env.local is ready for your local settings and is ignored by Git.
@@ -71,7 +81,8 @@ Google Workspace email setup
   After saving .env.local, restart npm run preview (or the dev server).
   These are server-only settings; never add a NEXT_PUBLIC_ prefix.
   No live email was sent during development verification. Once configured,
-  submit an intentional test quote and confirm receipt in all four inboxes.
+  submit an intentional test quote and confirm receipt in Gary's inbox and
+  the assigned rep's inbox, if that area has an assigned rep.
   The website confirms submission only after SMTP accepts all recipients;
   mailbox delivery or spam filtering still needs that inbox check.
 

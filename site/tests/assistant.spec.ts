@@ -1,5 +1,6 @@
 import { test, expect, type Locator } from "@playwright/test";
 import sharp from "sharp";
+import { getQuoteRouting } from "../src/lib/quote-routing";
 
 test("demo assistant finds real products and opens their details",async({page})=>{
   await page.goto("/");
@@ -39,7 +40,10 @@ async function completeQuote(assistant: Locator, options: { general?: boolean; p
   await assistant.getByLabel("Your name", { exact: true }).fill("Test Customer");
   await assistant.getByLabel("Email address", { exact: true }).fill("customer@example.invalid");
   await assistant.getByLabel("Phone number", { exact: true }).fill("abc");
-  await assistant.getByLabel("Company or location", { exact: true }).fill("Example Workshop, Cape Town");
+  await assistant.getByLabel("Town / city", { exact: true }).fill("Cape Town, Example Workshop");
+  await assistant.getByRole("button", { name: "Continue", exact: true }).click();
+  expect(await assistant.getByLabel("Province / region", { exact: true }).evaluate((element: HTMLSelectElement) => element.validity.valueMissing)).toBeTruthy();
+  await assistant.getByLabel("Province / region", { exact: true }).selectOption("western-cape");
   await assistant.getByRole("button", { name: "Continue", exact: true }).click();
   await expect(assistant.getByText("Enter a valid contact number.")).toBeVisible();
   await assistant.getByLabel("Phone number", { exact: true }).fill("+27 82 123 4567");
@@ -56,17 +60,22 @@ test("DCB Assist collects, reviews and submits a quote with both contact options
   await page.getByRole("button", { name: "Open DCB Assist" }).click();
   const assistant = page.getByRole("dialog", { name: "DCB Assist" });
   await completeQuote(assistant);
-  for (const name of ["Hans", "Shane", "Gary", "Sean"]) await expect(assistant.getByRole("link", { name: `${name}@dcbspares.co.za`, exact: true })).toBeVisible();
+  const routing = getQuoteRouting("western-cape");
+  const recipientLinks = assistant.locator(".quote-recipients a");
+  await expect(recipientLinks).toHaveCount(routing.cc ? 2 : 1);
+  await expect(assistant.locator('.quote-recipients a[href="mailto:Gary@dcbspares.co.za"]')).toBeVisible();
+  await expect(assistant.locator(".quote-review")).toContainText("Western Cape");
   await assistant.getByRole("button", { name: "Back", exact: true }).click();
   await expect(assistant.getByLabel("Your name", { exact: true })).toHaveValue("Test Customer");
-  await assistant.getByLabel("Company or location", { exact: true }).fill("Updated Workshop, Alrode");
+  await assistant.getByLabel("Town / city", { exact: true }).fill("Alrode, Updated Workshop");
+  await assistant.getByLabel("Province / region", { exact: true }).selectOption("gauteng");
   await assistant.getByRole("button", { name: "Continue", exact: true }).click();
   await assistant.getByRole("button", { name: "Submit quote request" }).click();
   await expect(assistant.getByRole("heading", { name: "Your quote request is submitted." })).toBeVisible();
   await expect(assistant).toContainText("DCB-TEST1234");
   expect(submitted).toMatchObject({
     part: "Two aftermarket starters, STR1246", make: "Toyota", model: "Hilux 3.0, 2014",
-    name: "Test Customer", email: "customer@example.invalid", phone: "+27 82 123 4567", companyOrLocation: "Updated Workshop, Alrode",
+    name: "Test Customer", email: "customer@example.invalid", phone: "+27 82 123 4567", companyOrLocation: "Alrode, Updated Workshop", area: "gauteng",
   });
   expect(submitted).not.toHaveProperty("to");
   expect(await assistant.evaluate(element => element.scrollWidth <= element.clientWidth)).toBeTruthy();
@@ -149,10 +158,12 @@ test("an unavailable mail service preserves the quote and offers accurate WhatsA
   await expect(assistant.getByRole("alert")).toContainText("Online submission is not connected yet");
   await expect(assistant.getByRole("heading", { name: "Your quote request is submitted." })).toHaveCount(0);
   const email = await assistant.getByRole("link", { name: "Email the sales team" }).getAttribute("href");
-  expect(email).toContain("Hans@dcbspares.co.za,Shane@dcbspares.co.za,Gary@dcbspares.co.za,Sean@dcbspares.co.za");
+  expect(decodeURIComponent(email!)).toContain("Gary@dcbspares.co.za");
+  expect(email).not.toContain("Hans@dcbspares.co.za,Shane@dcbspares.co.za");
   expect(decodeURIComponent(email!)).toContain("customer@example.invalid");
   const handoff = await assistant.getByRole("link", { name: "Send on WhatsApp" }).getAttribute("href");
-  expect(new URL(handoff!).searchParams.get("text")).toContain("Example Workshop, Cape Town");
+  expect(new URL(handoff!).searchParams.get("text")).toContain("Cape Town, Example Workshop");
+  expect(new URL(handoff!).searchParams.get("text")).toContain("Western Cape");
   await assistant.getByRole("button", { name: "Back", exact: true }).click();
   await expect(assistant.getByLabel("Email address", { exact: true })).toHaveValue("customer@example.invalid");
 });

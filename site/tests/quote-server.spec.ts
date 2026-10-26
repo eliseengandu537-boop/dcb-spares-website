@@ -2,9 +2,9 @@ import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import { createQuoteHandler } from "../src/lib/server/quote-handler";
 import { buildQuoteEmail, deliverQuote, getMailConfig, type MailConfig } from "../src/lib/server/quote-delivery";
-import { salesContacts } from "../src/lib/business";
 import type { QuoteDetails } from "../src/lib/quote";
-import { quoteText } from "../src/lib/quote";
+import { quoteEmailLink, quoteText } from "../src/lib/quote";
+import { getQuoteRouting, quoteAreas, quoteAreaLabel, type QuoteTerritories } from "../src/lib/quote-routing";
 import { maxUploadPhotoBytes } from "../src/lib/quote-photo";
 import type { QuotePhotoAttachment } from "../src/lib/server/quote-photo";
 import sharp from "sharp";
@@ -16,6 +16,7 @@ const details: QuoteDetails = {
   name: "Test Customer",
   email: "customer@example.invalid",
   phone: "+27 82 123 4567",
+  area: "not-sure",
   companyOrLocation: "Test Workshop, Cape Town",
 };
 const config: MailConfig = { sender: "quotes@dcbspares.co.za", auth: { user: "quotes@dcbspares.co.za", pass: "test-only-not-real" } };
@@ -65,9 +66,10 @@ test("photo quotes deliver a private metadata-free attachment and deduplicate re
   expect(metadata.xmp).toBeUndefined();
   let sentPhoto: unknown;
   await deliverQuote(received!, "DCB-PHOTO", config, photo, () => ({ sendMail: async mail => {
-    expect(mail.to).toEqual(salesContacts.map(contact => ({ name: contact.name, address: contact.email })));
+    expect(mail.to).toEqual([{ name: "Gary", address: "Gary@dcbspares.co.za" }]);
+    expect(mail.cc).toBeUndefined();
     sentPhoto = mail.attachments?.[0];
-    return { accepted: salesContacts.map(contact => contact.email), rejected: [] };
+    return { accepted: ["Gary@dcbspares.co.za"], rejected: [] };
   } }));
   expect(sentPhoto).toEqual(photo);
   const different = await sharp({ create: { width: 20, height: 20, channels: 3, background: "white" } }).jpeg().toBuffer();
@@ -98,12 +100,13 @@ test("invalid, oversized, disguised and multiple photo uploads never send mail",
   expect(deliveries).toBe(0);
 });
 
-test("email includes every supplied detail, all four fixed sales contacts and the customer's reply-to", () => {
+test("unassigned quotes go only to Gary with all supplied details and the customer's reply-to", () => {
   const mail = buildQuoteEmail(details, "DCB-TEST", config.sender);
-  expect(mail.to).toEqual(salesContacts.map(contact => ({ name: contact.name, address: contact.email })));
+  expect(mail.to).toEqual([{ name: "Gary", address: "Gary@dcbspares.co.za" }]);
+  expect(mail.cc).toBeUndefined();
   expect(mail.from).toEqual({ name: "DCB Assist", address: config.sender });
   expect(mail.replyTo).toEqual({ name: details.name, address: details.email });
-  for (const value of Object.values(details)) expect(mail.text).toContain(value);
+  for (const [key, value] of Object.entries(details)) expect(mail.text).toContain(key === "area" ? quoteAreaLabel(value) : value);
   expect(mail.text).toContain("DCB-TEST");
   expect(mail.disableFileAccess).toBe(true);
   expect(mail.disableUrlAccess).toBe(true);
@@ -175,10 +178,51 @@ test("missing mail configuration and sending failures never return success", asy
   expect(deliveries).toBe(1);
 });
 
-test("mail success requires acceptance for all four sales recipients", async () => {
-  const accepted = salesContacts.map(contact => contact.email);
-  await expect(deliverQuote(details, "DCB-TEST", config, undefined, () => ({ sendMail: async () => ({ accepted, rejected: [] }) }))).resolves.toBeUndefined();
-  await expect(deliverQuote(details, "DCB-TEST", config, undefined, () => ({ sendMail: async () => ({ accepted: accepted.slice(0, 3), rejected: [accepted[3]] }) }))).rejects.toThrow("not confirmed");
+test("mail success requires both the assigned rep and Gary to be accepted", async () => {
+  const routedConfig = { ...config, territories: { gauteng: "Hans" } satisfies QuoteTerritories };
+  const localDetails = { ...details, area: "gauteng" };
+  const accepted = ["Hans@dcbspares.co.za", "Gary@dcbspares.co.za"];
+  await expect(deliverQuote(localDetails, "DCB-TEST", routedConfig, undefined, () => ({ sendMail: async mail => {
+    expect(mail.to).toEqual([{ name: "Hans", address: "Hans@dcbspares.co.za" }]);
+    expect(mail.cc).toEqual([{ name: "Gary", address: "Gary@dcbspares.co.za" }]);
+    return { accepted, rejected: [] };
+  } }))).resolves.toBeUndefined();
+  for (const missing of accepted) {
+    await expect(deliverQuote(localDetails, "DCB-TEST", routedConfig, undefined, () => ({ sendMail: async () => ({ accepted: accepted.filter(email => email !== missing), rejected: [] }) }))).rejects.toThrow("not confirmed");
+  }
+});
+
+test("confirmed territory routing chooses one rep, always copies Gary, and matches the email fallback", () => {
+  // Illustrative fixtures only; these are not DCB's actual territory assignments.
+  const territories = { gauteng: "Hans", "western-cape": "Shane", "eastern-cape": "Sean" } satisfies QuoteTerritories;
+  for (const [area, owner] of Object.entries(territories)) {
+    const quote = { ...details, area };
+    const mail = buildQuoteEmail(quote, "DCB-ROUTING", config.sender, undefined, territories);
+    expect(mail.to).toEqual([{ name: owner, address: `${owner}@dcbspares.co.za` }]);
+    expect(mail.cc).toEqual([{ name: "Gary", address: "Gary@dcbspares.co.za" }]);
+    expect(mail.text).toContain(`Sales owner: ${owner}`);
+    const fallback = new URL(quoteEmailLink(quote, territories));
+    expect(fallback.pathname).toBe(`${owner}@dcbspares.co.za`);
+    expect(fallback.searchParams.get("cc")).toBe("Gary@dcbspares.co.za");
+  }
+  for (const area of [...Object.keys(quoteAreas), "", "constructor", "unknown"]) {
+    const routing = getQuoteRouting(area, {});
+    expect(routing.to.email).toBe("Gary@dcbspares.co.za");
+    expect(routing.cc).toBeUndefined();
+  }
+});
+
+test("area validation supports older forms and never accepts customer-supplied recipients", async () => {
+  const received: QuoteDetails[] = [];
+  const handler = createQuoteHandler({ getConfig: () => config, deliver: async value => { received.push(value); } });
+  expect((await handler(request({ area: "", to: "attacker@example.invalid" }))).status).toBe(400);
+  expect((await handler(request({ area: "constructor" }))).status).toBe(400);
+  expect((await handler(request({ area: undefined, to: ["attacker@example.invalid"], cc: ["Sean@dcbspares.co.za"], territories: { "not-sure": "Sean" } }))).status).toBe(202);
+  expect(received[0]).toEqual(details);
+  const mail = buildQuoteEmail(received[0], "DCB-LEGACY", config.sender);
+  expect(mail.to).toEqual([{ name: "Gary", address: "Gary@dcbspares.co.za" }]);
+  expect(mail.cc).toBeUndefined();
+  expect(quoteEmailLink(received[0])).toMatch(/^mailto:Gary@dcbspares\.co\.za\?/);
 });
 
 test("repeat submissions are rate limited and the window expires", async () => {

@@ -4,8 +4,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useRef, useState, useSyncExternalStore, type FormEvent } from "react";
 import { ArrowLeft, ArrowRight, Camera, Check, ChevronDown, Mail, MessageCircle, X } from "lucide-react";
-import { emptyQuote, quoteEmailLink, quoteFields, quoteText, validateQuote, type QuoteDetails, type QuoteField } from "@/lib/quote";
-import { salesContacts } from "@/lib/business";
+import { emptyQuote, quoteEmailLink, quoteFields, quoteFieldValue, quoteText, validateQuote, type QuoteDetails, type QuoteField } from "@/lib/quote";
+import { getQuoteRouting, quoteAreas } from "@/lib/quote-routing";
 import { whatsapp } from "@/lib/data";
 import { photoTypes, prepareQuotePhoto } from "@/lib/quote-photo";
 import { requestAssistant } from "@/lib/assistant-events";
@@ -32,6 +32,7 @@ export function AssistantQuote({ onCancel, onBusy }: Props) {
   const photoInput = useRef<HTMLInputElement>(null);
   const requestId = useRef("");
   const heading = useRef<HTMLHeadingElement>(null);
+  const routing = getQuoteRouting(details.area);
   useEffect(() => { heading.current?.focus(); heading.current?.scrollIntoView({ block: "nearest" }); }, [step, reference]);
   useEffect(() => () => { photoAttempt.current++; if (photoUrl.current) URL.revokeObjectURL(photoUrl.current); }, []);
 
@@ -64,7 +65,7 @@ export function AssistantQuote({ onCancel, onBusy }: Props) {
     const shared = { id: `quote-${field.key}`, name: field.key, placeholder: field.placeholder, value: details[field.key], required: !field.optional, minLength: field.optional ? undefined : 2, maxLength: field.max, "aria-invalid": !!errors[field.key], "aria-describedby": errors[field.key] ? `error-${field.key}` : undefined };
     return <div key={field.key} className="quote-field">
       <label className={field.key === "part" ? "sr-only" : undefined} htmlFor={shared.id}>{field.label}</label>
-      {field.key === "part" ? <textarea {...shared} rows={3} onChange={event => update(field.key, event.target.value)} /> : <input {...shared} type={field.type || "text"} autoComplete={field.autoComplete || "off"} onChange={event => update(field.key, event.target.value)} />}
+      {field.key === "area" ? <select id={shared.id} name={field.key} value={details.area} required autoComplete="address-level1" aria-invalid={shared["aria-invalid"]} aria-describedby={shared["aria-describedby"]} onChange={event => update("area", event.target.value)}><option value="">{field.placeholder}</option>{Object.entries(quoteAreas).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select> : field.key === "part" ? <textarea {...shared} rows={3} onChange={event => update(field.key, event.target.value)} /> : <input {...shared} type={field.type || "text"} autoComplete={field.autoComplete || "off"} onChange={event => update(field.key, event.target.value)} />}
       {errors[field.key] && <small id={`error-${field.key}`} className="quote-field-error">{errors[field.key]}</small>}
     </div>;
   }
@@ -117,7 +118,7 @@ export function AssistantQuote({ onCancel, onBusy }: Props) {
   if (reference) return <section className="assistant-quote quote-confirmation" aria-label="Quote submitted">
     <span className="quote-success-icon"><Check size={24} /></span>
     <h3 ref={heading} tabIndex={-1}>Your quote request is submitted.</h3>
-    <p>It has been accepted for sending to Hans, Shane, Gary and Sean. The DCB sales team will contact you using the details you provided.</p>
+    <p>{routing.cc ? `It has been accepted for sending to ${routing.to.name}, with Gary copied.` : "It has been accepted for sending to Gary, who will coordinate your request with the right sales representative."} The DCB team will contact you using the details you provided.</p>
     {photo && <p>Your photo is attached to the quote email. To share it on WhatsApp too, add it to your WhatsApp message.</p>}
     <span className="quote-reference">REFERENCE · {reference}</span>
     <a className="button button-primary" href={whatsapp(quoteText(details, reference))} target="_blank" rel="noopener noreferrer"><MessageCircle size={16} />Continue on WhatsApp</a>
@@ -129,7 +130,7 @@ export function AssistantQuote({ onCancel, onBusy }: Props) {
       {["Your request", "Your details", "Review"].map((label, index) => <span key={label} aria-current={step === index ? "step" : undefined} className={index <= step ? "is-active" : ""}><b>{index + 1}</b>{label}</span>)}
     </div>
     <h3 ref={heading} tabIndex={-1}>{["What do you need a quote for?", "How can our team reach you?", "Ready to send to DCB?"][step]}</h3>
-    <p>{["Describe what you need. A quantity, part number or photo helps.", "Add your contact details and company or location.", "Check your details. Your request will go to all four sales contacts below."][step]}</p>
+    <p>{["Describe what you need. A quantity, part number or photo helps.", "Add your contact details and location so the right person can help.", routing.cc ? `Your request will go to ${routing.to.name}, with Gary copied.` : "Check your details. Gary will coordinate your request with the right sales representative."][step]}</p>
     <p className="privacy-notice">DCB uses your details and photo to respond to your quote. <Link href="/privacy-policy/" target="_blank" rel="noopener noreferrer" aria-label="Privacy policy (opens in a new tab)">Privacy policy</Link>.</p>
     <form onSubmit={submit} noValidate={step === 2}>
       {step === 0 ? <>
@@ -148,9 +149,9 @@ export function AssistantQuote({ onCancel, onBusy }: Props) {
           {quoteFields.slice(1, 3).map(fieldInput)}
         </details>
       </> : step === 1 ? quoteFields.slice(3).map(fieldInput) : <>
-        <dl className="quote-review">{quoteFields.filter(field => !field.optional || details[field.key]).map(field => <div key={field.key}><dt>{field.label.replace("?", "")}</dt><dd>{details[field.key]}</dd></div>)}</dl>
+        <dl className="quote-review">{quoteFields.filter(field => !field.optional || details[field.key]).map(field => <div key={field.key}><dt>{field.label.replace("?", "")}</dt><dd>{quoteFieldValue(field.key, details)}</dd></div>)}</dl>
         {photo && <figure className="quote-review-photo"><Image src={photo.url} alt="Photo supplied with this quote" width={320} height={220} unoptimized /><figcaption>Photo included with your quote</figcaption></figure>}
-        <div className="quote-recipients"><span>DCB SALES TEAM</span>{salesContacts.map(contact => <a key={contact.email} href={`mailto:${contact.email}`}>{contact.email}</a>)}</div>
+        <div className="quote-recipients"><span>YOUR DCB CONTACT{routing.cc ? "S" : ""}</span><a href={`mailto:${routing.to.email}`}>{routing.to.email}</a>{routing.cc && <a href={`mailto:${routing.cc.email}`}>CC: {routing.cc.email}</a>}</div>
         <p className="quote-privacy">Submitting shares these details with DCB’s sales team so they can respond to this quote request.</p>
       </>}
       <label className="quote-honeypot" aria-hidden="true">Website<input name="website" autoComplete="off" tabIndex={-1} /></label>

@@ -51,7 +51,7 @@ export default function PrivacyPolicyPage() {
         <section id="information"><h2>02 <span>Information we collect</span></h2>
           <p>You can browse our catalogue without creating an account. Information collected depends on how you contact us:</p>
           <ul>
-            <li><strong>Quote requests:</strong> your name, email, phone number, company or location, the item you need, and any vehicle details or optional item photograph you choose to provide.</li>
+            <li><strong>Quote requests:</strong> your name, email, phone number, province or region, town or city, any company details, the item you need, and any vehicle details or optional item photograph you choose to provide.</li>
             <li><strong>WhatsApp enquiries:</strong> details you choose to include, such as part numbers, vehicle specifications, preferred branch, quantities and messages. You may also share photographs directly in WhatsApp.</li>
             <li><strong>Correspondence:</strong> messages and contact details you send to our team by email or WhatsApp.</li>
             <li><strong>Technical information:</strong> our hosting provider may process IP addresses, browser and device details, requested pages, timestamps and security or error information when serving the website.</li>
@@ -72,7 +72,8 @@ export default function PrivacyPolicyPage() {
         </section>
 
         <section id="sharing"><h2>05 <span>Who receives information</span></h2>
-          <p>DCB Assist quote requests are addressed to all four sales contacts so the team can respond:</p>
+          <p>Gary receives every DCB Assist quote request. Where a sales representative is assigned to your area, that representative receives the request with Gary copied. Otherwise, it goes only to Gary so he can coordinate the enquiry with the appropriate person. Requests are not automatically sent to every sales representative.</p>
+          <p>The DCB sales contacts who may handle your enquiry are:</p>
           <ul className={styles.recipients}>{salesContacts.map(contact => <li key={contact.email}><a href={`mailto:${contact.email}`}>{contact.email}</a></li>)}</ul>
           <p>Service providers involved include Vercel for hosting, Google Workspace for configured quote-email delivery, and WhatsApp when you choose that contact option. Email or messaging providers you use also process the messages you send. Information may be disclosed where required by law.</p>
           <p>These providers may process information outside South Africa. POPIA restricts international transfers and requires an applicable legal basis, such as adequate protection or another permitted ground. Contact DCB for information about arrangements relevant to your enquiry.</p>
