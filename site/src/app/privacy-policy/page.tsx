@@ -4,12 +4,13 @@ import { Eyebrow } from "@/components/ui";
 import { branches } from "@/lib/data";
 import { salesContacts } from "@/lib/business";
 import styles from "./privacy.module.css";
+import { pageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMetadata({
   title: "Privacy policy",
   description: "How DCB Spares handles website enquiries, DCB Assist quotes, WhatsApp messages and personal information, and how to contact us about your privacy.",
-  alternates: { canonical: "https://www.dcbspares.co.za/privacy-policy/" },
-};
+  path: "/privacy-policy/",
+});
 
 const contents = [
   ["who-we-are", "Who we are"],

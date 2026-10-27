@@ -127,7 +127,7 @@ export function ExplodedAlternator() {
           <div className="hero-copy">
             <Eyebrow>PRIMARY DISTRIBUTOR OF GB PRODUCTS</Eyebrow>
             <h1>Power<br />every <span>journey.</span></h1>
-            <p>DCB Spares is the primary distributor of GB products.<br />Quality aftermarket auto-electrical spares for your vehicle.</p>
+            <p>DCB Spares is the primary distributor of GB products.<br />Aftermarket auto-electrical spares in Alrode and Cape Town.</p>
             <div className="button-group">
               <ButtonLink href="/products/">Explore our parts</ButtonLink>
               <EnquiryButton className="button button-ghost">Find my part</EnquiryButton>

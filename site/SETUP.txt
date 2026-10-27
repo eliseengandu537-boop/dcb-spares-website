@@ -196,6 +196,31 @@ Publication
   .openai/hosting.json records the existing private Sites project identity.
   Its static out/ setting describes the earlier version, not this Node app.
   Do not publish the older out/ directory as the updated website.
-  The catalogue rebuild runs locally on port 3001 as requested.
-  Search indexing is disabled for this private rebuild preview.
-  Original dcbspares.co.za hosting and DNS have not been changed.
+  Production is hosted on the Vercel project "site" (root directory: site).
+  The preferred public domain is https://www.dcbspares.co.za/.
+  The bare dcbspares.co.za domain redirects to the www domain.
+  The local production preview runs on port 3001.
+
+Search visibility
+  Production pages allow search indexing. Vercel Preview deployments and
+  next dev retain noindex. Canonical URLs always use the public www domain.
+  /robots.txt advertises /sitemap.xml. The sitemap includes 1,563 preferred
+  URLs: 1,528 products, 16 categories, 12 vehicle ranges and 7 main pages.
+  Product image URLs are included. Legacy page aliases identify their current
+  equivalents with canonical links; they are not duplicated in the sitemap.
+  Organization, branch and breadcrumb JSON-LD uses the details on the site.
+  No unverified opening hours, ratings, prices or availability are advertised.
+  Without public prices or reviews, Product offer/rating markup is omitted.
+  Regenerate the sharing graphic with node scripts/prepare-social-image.mjs.
+
+  After npm run build, run node scripts/audit-seo.mjs to check the metadata
+  of every generated content page, including original URL aliases.
+  With the local preview running, run npx playwright test tests/seo.spec.ts.
+
+  In Google Search Console (https://search.google.com/search-console/),
+  verify dcbspares.co.za or the URL-prefix https://www.dcbspares.co.za/.
+  Under Sitemaps, submit https://www.dcbspares.co.za/sitemap.xml.
+  Use URL Inspection to request indexing of the homepage and key ranges.
+  This requires the owner's Google account and property verification; code
+  deployment alone does not register a Search Console property or guarantee
+  rankings. Monitor Page indexing after Google crawls the updated pages.

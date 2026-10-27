@@ -32,8 +32,8 @@ export const categories: Category[] = [
 export const brands = ["Toyota", "Ford", "Mercedes-Benz", "Volkswagen", "Mitsubishi", "Mazda", "Volvo", "Citroën", "Peugeot", "John Deere", "Case", "Cummins"];
 
 export const branches = [
-  { name: "DCB Alrode", region: "Gauteng", city: "Alberton", street: "16 Bosworth Street", area: "Alrode, Alberton, 1451", phone: "011 908 6366", tel: "+27119086366", map: "16 Bosworth Street, Alrode, Alberton, South Africa" },
-  { name: "DCB Auto Cape", region: "Western Cape", city: "Cape Town", street: "25 Palmiet Road", area: "Stikland Industrial, Cape Town, 7530", phone: "021 286 2737", tel: "+27212862737", map: "25 Palmiet Road, Stikland Industrial, Cape Town, South Africa" },
+  { slug: "alrode", postalCode: "1451", name: "DCB Alrode", region: "Gauteng", city: "Alberton", street: "16 Bosworth Street", area: "Alrode, Alberton, 1451", phone: "011 908 6366", tel: "+27119086366", map: "16 Bosworth Street, Alrode, Alberton, South Africa" },
+  { slug: "cape-town", postalCode: "7530", name: "DCB Auto Cape", region: "Western Cape", city: "Cape Town", street: "25 Palmiet Road", area: "Stikland Industrial, Cape Town, 7530", phone: "021 286 2737", tel: "+27212862737", map: "25 Palmiet Road, Stikland Industrial, Cape Town, South Africa" },
 ];
 
 export const whatsappNumber = "+27 83 630 3818";

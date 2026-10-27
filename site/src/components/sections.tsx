@@ -20,7 +20,7 @@ export function HelpSection() {
 }
 
 export function BranchCards() {
-  return <div className="branch-grid">{branches.map((branch, index) => <Reveal key={branch.name} delay={index * 0.1}><article className="branch-card"><div className="branch-top"><span className="micro-label">{branch.region}</span><MapPin size={21} /></div><h3>{branch.city}<span>.</span></h3><p className="branch-name">{branch.name}</p><address>{branch.street}<br />{branch.area}<br />South Africa</address><div className="branch-links"><a href={`tel:${branch.tel}`}><Phone size={15} />{branch.phone}</a><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branch.map)}`} target="_blank" rel="noopener noreferrer">Directions<ArrowUpRight size={16} /></a></div></article></Reveal>)}</div>;
+  return <div className="branch-grid">{branches.map((branch, index) => <Reveal key={branch.name} delay={index * 0.1}><article className="branch-card" id={branch.slug}><div className="branch-top"><span className="micro-label">{branch.region}</span><MapPin size={21} /></div><h3>{branch.city}<span>.</span></h3><p className="branch-name">{branch.name}</p><address>{branch.street}<br />{branch.area}<br />South Africa</address><div className="branch-links"><a href={`tel:${branch.tel}`}><Phone size={15} />{branch.phone}</a><a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(branch.map)}`} target="_blank" rel="noopener noreferrer">Directions<ArrowUpRight size={16} /></a></div></article></Reveal>)}</div>;
 }
 
 export function ContactSection() {
