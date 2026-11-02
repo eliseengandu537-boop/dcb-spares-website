@@ -50,7 +50,7 @@ export function DemoAssistant(){
   function submit(event:FormEvent){event.preventDefault();void send(draft);}
   const latest=messages.filter(m=>m.role==="user").at(-1)?.text;
   return <><button className="assistant-launcher" onClick={show} aria-label="Open DCB Assist" aria-haspopup="dialog" aria-expanded={open}><span className="assistant-launcher-icon"><Sparkles size={21} /></span><span>Ask DCB<small>PARTS & QUOTES</small></span><span className="assistant-launcher-dot" /></button>
-  <dialog ref={dialog} className={`assistant-dialog${quoteOpen ? " assistant-dialog-quote" : ""}`} aria-labelledby="assistant-title" onClose={()=>setOpen(false)} onClick={event=>{if(event.target===event.currentTarget)close();}}>
+  <dialog ref={dialog} id="dcb-assistant" className={`assistant-dialog${quoteOpen ? " assistant-dialog-quote" : ""}`} aria-labelledby="assistant-title" onClose={()=>setOpen(false)} onClick={event=>{if(event.target===event.currentTarget)close();}}>
     <div className="assistant-panel"><header className="assistant-header"><span className="assistant-avatar"><Sparkles size={22} /></span><div><h2 id="assistant-title">DCB Assist<span>GUIDE</span></h2><p>Your auto-electrical guide</p></div><button className="icon-button assistant-reset" onClick={reset} disabled={quoteBusy} aria-label="Start a new conversation"><RotateCcw size={17} /></button><button className="icon-button" onClick={close} aria-label="Close assistant"><X size={21} /></button></header>
     <div className="assistant-demo-note"><span />Guided support · catalogue-based replies</div>
     <div ref={conversation} className="assistant-conversation" role="log" aria-label="Assistant conversation" aria-live="polite" aria-relevant="additions" aria-busy={pending}>
