@@ -34,7 +34,7 @@ html { scroll-padding-top: calc(var(--navigation-height) + 20px); }
   .mobile-assistant-prompt-copy { display: flex; flex-direction: column; gap: 2px; min-width: 0; line-height: 1.5; }
   .mobile-assistant-prompt-copy > span { font-size: 11px; color: #b8bac4; }
   .mobile-assistant-prompt-copy > strong { font-size: 13px; font-weight: 600; color: #ffb4bc; }
-  .mobile-assistant-prompt-arrow { color: #ff8493; animation: assistant-prompt-nudge 1.6s ease-in-out 3; }
+  .mobile-assistant-prompt-arrow { color: #ff8493; animation: assistant-prompt-float 2s ease-in-out infinite; }
   .mobile-assistant-prompt:hover .mobile-assistant-prompt-copy > strong { color: #fff; }
   .mobile-actions { position: fixed; z-index: 35; bottom: 0; left: 0; right: 0; display: grid; grid-template-columns: repeat(4, 1fr); padding: 6px 12px calc(6px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid #ffffff24; background: #121318f5; backdrop-filter: blur(16px); box-shadow: 0 -8px 30px #0003; }
   .mobile-actions > a, .mobile-actions > button { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 60px; border: 0; border-radius: 6px; background: transparent; color: #d3d5df; font-size: 11px; line-height: 1.4; }
@@ -58,9 +58,9 @@ html { scroll-padding-top: calc(var(--navigation-height) + 20px); }
   .catalogue-filters button { font-size: 12px; }
   .catalogue-tabs button { min-height: 48px; }
 }
-@keyframes assistant-prompt-nudge {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(4px); }
+@keyframes assistant-prompt-float {
+  0%, 100% { transform: translateY(-2px) rotate(-3deg); }
+  50% { transform: translateY(6px) rotate(3deg); }
 }
 @media (prefers-reduced-motion: reduce) {
   .mobile-assistant-prompt-arrow { animation: none; }
