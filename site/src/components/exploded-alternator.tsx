@@ -8,7 +8,7 @@ import { Atmosphere } from "@/components/motion";
 import { ButtonLink, Eyebrow } from "@/components/ui";
 import { EnquiryButton } from "@/components/enquiry";
 import { TrustLine } from "@/components/sections";
-import { MobileAssistantPrompt } from "@/components/mobile-assistant-prompt";
+import { AssistantPrompt } from "@/components/assistant-prompt";
 import type { AlternatorScene } from "@/lib/alternator-scene";
 import "./alternator.css";
 
@@ -133,7 +133,7 @@ export function ExplodedAlternator() {
               <ButtonLink href="/products/">Explore our parts</ButtonLink>
               <EnquiryButton className="button button-ghost">Find my part</EnquiryButton>
             </div>
-            <MobileAssistantPrompt />
+            <AssistantPrompt />
             <TrustLine />
             <a className="hero-browse-link" href="#range">Browse product ranges<ArrowDown size={15} /></a>
           </div>
